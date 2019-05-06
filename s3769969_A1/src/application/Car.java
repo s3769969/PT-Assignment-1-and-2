@@ -1,0 +1,346 @@
+package application;
+
+import utilities.DateTime;
+import application.Booking;
+
+/*
+ * Class:			Car
+ * Description:		The class represents a specific Car
+ * Author:			Sebastian Wisidagama - s3769969
+ */
+public class Car {
+
+	private String regNo;
+	private String make;
+	private String model;
+	private String driverName;
+	private int passengerCapacity;
+	private boolean available;
+	private Booking[] currentBookings;
+	private Booking[] pastBookings;
+
+	/*Creates Car object based on arguments. Changes arguments to satisfy rules before assigning them
+	to class variables.*/
+	public Car(String regNo, String make, String model, String driverName, int passengerCapacity) {
+
+		/*Checks registration string format is in format 'ABC123' else defaults it to "ZZZ999".
+		Then converts to upper case and assigns to class variable.*/
+		if (regNo.length() != 6 || Character.isLetter(regNo.charAt(0)) != true
+			|| Character.isLetter(regNo.charAt(1)) != true || Character.isLetter(regNo.charAt(2)) != true
+			|| Character.isDigit(regNo.charAt(3)) != true || Character.isDigit(regNo.charAt(4)) != true
+			|| Character.isDigit(regNo.charAt(5)) != true) {
+			this.regNo = "ZZZ999";
+		} else {
+			regNo = regNo.toUpperCase();
+			this.regNo = regNo;
+		}
+
+		this.make = make; //Assigns make argument to class variable
+		this.model = model; //Assigns model argument to class variable
+		this.driverName = driverName; //Assigns driver name argument to class variable
+		
+		/*Checks if passenger capacity is less than 1 or greater than 9 and reassigns default values before
+		assigning to class variable*/
+		if (passengerCapacity < 1) {
+			this.passengerCapacity = 1;
+		} else if (passengerCapacity > 9) {
+			this.passengerCapacity = 9;
+		} else {
+			this.passengerCapacity = passengerCapacity;
+		}
+		currentBookings = new Booking[20]; // Initialises currentBookings[] to 20 elements each car object
+		pastBookings = new Booking[20]; // Initialises pastBookings[] to 20 elements for each car object
+		available = true; //Initialises available state of new car object as true
+	}
+
+	/*Booking method for Car. Takes arguments and checks that it satisfies rules. If all rules are
+	  satisfied a booking is made and method returns true. Otherwise method returns false. If 5 
+	  bookings exist in currentBookings array then method updates available variable to false.*/
+	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) {
+		
+		/*Checks booking date is not already in currentBookings array. If so, it is displays error
+		and returns false. Else passes through.*/
+		int i = 0; 
+		while(i < currentBookings.length) {
+			if (currentBookings[i] == null){
+				i = currentBookings.length;
+			}else if (currentBookings[i].getFormattedPickUpDate().equals(required.getFormattedDate())) {
+				System.out.println("Error - Car can only be booked once per day.\n");
+				return false;
+			}else if (currentBookings[i].getFormattedPickUpDate().equals(required.getFormattedDate())
+				== false){
+				i++;
+			}
+		}
+		
+		/*Checks if there are more than 4 elements in currentBookings array. If so, it is displays
+		error, updates available status of car to false and returns false. Else, checks elements in
+		the array for null element. If the null element is the 5th element, available status is changed
+		to false and passes through loop.If next null element is <5th element, available status is set
+		to true and passes through the loop.*/
+		i = 0;
+		while(i < currentBookings.length) {
+			if (i > 4) {
+				System.out.println("Error - Car can only have 5 current bookings.\n");
+				available = false;
+				return false;
+			}else if (currentBookings[i] == null){
+				if (i < 4){
+					available = true;
+				}else if(i == 4) {
+					available = false;
+				}
+				i = currentBookings.length;
+			}else if (currentBookings[i] != null){
+				i++;
+			}
+		}
+		
+		/*Checks required booking date is in the past. If so, it is displays error and returns false.
+		Else passes through.*/
+		DateTime currentExact = new DateTime(); //Initialises exact current DateTime object
+		String currentExactString = currentExact.getFormattedDate(); //Converts current DateTime to string
+		DateTime current = convertStringToTime(currentExactString); //Initialises DateTime to 12am today
+		int dayDiff = DateTime.diffDays(required, current);
+		if (dayDiff < 0) {
+			System.out.println("Error - Cannot book for past dates.\n");
+			return false;
+		}
+		
+		/*Checks required booking date more than 7 days in the future. If so, it is displays error and
+		returns false. Else passes through.*/
+		current = new DateTime();
+		dayDiff = DateTime.diffDays(required, current);
+		if (dayDiff > 7) {
+			System.out.println("Error - Cannot book for more than 7 days in future.\n");
+					return false;
+		}
+		
+		/*Checks that number of passengers is not greater than car capacity. If so, it is displays
+		error and returns false. Else passes through.*/
+		if(numPassengers > passengerCapacity) {
+			System.out.println("Error - Number of passengers exceeds passenger capacity for this car.\n");
+			return false;
+		}
+		
+		/*Creates new booking object using arguments in currentBookings array if element is null. Else
+		checks for next null element in the array and references booking there*/
+		Booking booking = new Booking(firstName, lastName, required, numPassengers, this);
+		
+		i = 0;
+		while(i < currentBookings.length) {
+			if (currentBookings[i] == null) {
+				currentBookings[i] = booking;
+				i = currentBookings.length;
+			}else {
+				i++;
+			}
+		}
+		
+		return true; //Returns true once booking is made
+	}
+	
+	/*Checks string argument for date match in currentBookings array. If found, returns booking ID.
+	Else, returns error.*/
+	public String getBookingRef(DateTime required) {
+		
+		int i = 0; 
+		while(i < currentBookings.length) {
+			if (currentBookings[i] == null){
+				System.out.println("Error - No booking reference found.\n");
+				i = currentBookings.length;
+			}else if (currentBookings[i].getPickUpDateTime().getFormattedDate().equals
+					(required.getFormattedDate())){
+				return currentBookings[i].getId();
+			}else if (currentBookings[i].getPickUpDateTime().getFormattedDate().equals
+					(required.getFormattedDate()) == false){
+				i++;
+			}
+		}
+		return "Error - No booking reference found.\n";
+	}
+	
+	//Checks arguments match existing past booking and returns total fee. Else, returns error message.
+	public String getTotalFee(Double kilometersTravelled, String firstName, String lastName){
+		
+		int i = 0; //Initialise local variable i
+		int j = 100; //Initialise local variable j out of booking array lengths
+		
+		/*Checks if arguments names match names in existing booking for car. If true overrides j with
+		index number for location of booking in currentBookings array. Else, passes through and j
+		remains 100*/
+		while(i < pastBookings.length) {
+			if (pastBookings[i] == null) {
+				i = currentBookings.length;
+			}else if (pastBookings[i].getFirstName().equalsIgnoreCase(firstName) &&
+					pastBookings[i].getLastName().equalsIgnoreCase(lastName) &&
+					pastBookings[i].getKilometersTravelled() == kilometersTravelled) {
+				return pastBookings[i].totalFee();
+			}else {
+				i++;
+			}
+		}
+			return "Error - Booking could not be located\n";
+	}
+	
+	/*Checks arguments match existing booking and returns true if booking is completed. Else,
+	returns false.*/
+	public boolean completeBookingUsingReg(Double kilometersTravelled, String firstName, String lastName){
+		
+		int i = 0; //Initialise local variable i
+		int j = 100; //Initialise local variable j out of booking array lengths
+		
+		/*Checks if arguments names(ignoring case) match names in existing booking for car. If true
+		overrides j with index number for location of booking in currentBookings array. Else, passes
+		through and j remains 100*/
+		while(i < currentBookings.length) {
+			if (currentBookings[i] == null) {
+				i = currentBookings.length;
+			}else if (currentBookings[i].getFirstName().equalsIgnoreCase(firstName) &&
+					currentBookings[i].getLastName().equalsIgnoreCase(lastName)) {
+				j = i;
+				i = currentBookings.length;
+			}else {
+				i++;
+			}
+		}
+		
+		/*Assigns i to 0 and if match was found, then references next null element in pastBookings
+		array with matched booking from currentBookings array and set distance travelled in Booking
+		object to argument double*/
+		i = 0;
+		if (j != 100) {
+			while(i < pastBookings.length) {
+			if (pastBookings[i] == null) {
+				pastBookings[i] = currentBookings[j];
+				pastBookings[i].setKilometersTravelled(kilometersTravelled);
+			}else {
+				i++;
+			}
+			}
+		}
+		
+		/*Then overrides currentBookings element that was copied to pastBookings[] with next element
+		in currentBookings array, only if booking was copied. Then all elements in currentBookings
+		after index j are moved down 1 index.*/
+		while (j + 1 < currentBookings.length) {
+			currentBookings[j] = currentBookings[j + 1];
+			j++;
+		}
+		
+		if (j == 100) {
+			return false; //If booking could not be completed
+		}else {
+			return true; //If booking was completed
+		}	
+	}
+
+	/*Checks if there are in bookings in currentBookings array. If so, returns true. Else, returns
+	false.*/ 
+	public boolean findCurrentBookingByReg() {
+			
+		int i = 0;
+		if (currentBookings[i] == null){
+			return false;	
+		}else {
+			return true;
+		}
+	}
+	
+	/*Checks if argument matches a booking in currentBookings array. If so, returns true. Else,
+	returns false. */
+	public boolean findCurrentBooking(String required) {
+		
+		int i = 0; 
+		while(i < currentBookings.length) {
+			if (currentBookings[i] == null){
+				i = currentBookings.length;
+			}else if (currentBookings[i].getFormattedPickUpDate().contentEquals(required)){
+				return true;
+			}else if (currentBookings[i].getFormattedPickUpDate().contentEquals(required) == false){
+				i++;
+			}
+		}
+		return false;
+	}
+	
+	/*Checks if argument matches a booking in pastBookings array. If so, returns true. Else,
+	returns false.*/ 
+	public boolean findPastBooking(String required) {
+		
+		int i = 0; 
+		while(i < pastBookings.length) {
+			if (pastBookings[i] == null){
+				i = pastBookings.length;
+			}else if (pastBookings[i].getFormattedPickUpDate().contentEquals(required)){
+				return true;
+			}else if (pastBookings[i].getFormattedPickUpDate().contentEquals(required) == false){
+				i++;
+			}
+		}
+		return false;
+	}
+	
+	/*Converts string argument to DateTime object if string is in format "dd/MM/yyyy" and returns
+	DateTime object*/
+	public DateTime convertStringToTime(String string) {
+		
+		int day = Integer.parseInt(string.substring(0, 2));
+		int month = Integer.parseInt(string.substring(3, 5));
+		int year = Integer.parseInt(string.substring(6));
+		DateTime stringToTime = new DateTime(day, month, year);
+		return stringToTime;
+	}
+	
+	//Getter for registration number string of Car
+	public String getRegNo() {
+		return regNo;
+	}
+
+	//Getter for make string of Car
+	public String getMake() {
+		return make;
+	}
+
+	//Getter for model string of Car
+	public String getModel() {
+		return model;
+	}
+
+	//Getter for driver name string of Car
+	public String getDriverName() {
+		return driverName;
+	}
+
+	//Getter for passenger capacity integer of Car
+	public int getPassengerCapacity() {
+		return passengerCapacity;
+	}
+
+	//Getter for available status of Car in boolean format
+	public boolean getAvailable() {
+			return available;
+	}
+	
+	//Getter for available status of Car in string format
+	public String availableString() {
+		if (available) {
+			return "YES";
+		} else {
+			return "NO";
+		}
+	}
+
+	//Getter for Car details in human readable format
+	public String getDetails() {
+		return "RegNo:          " + regNo + "\n" + "Make and Model: " + make + " " + model + "\n"
+				+ "DriverName:     " + driverName + "\n" + "Capacity:       " + passengerCapacity
+				+ "\n" + "Available:      " + availableString() + "\n";
+	}
+
+	//Getter for Car details in predefined format for computer
+	public String toString() {
+		return regNo.toUpperCase() + ":" + make + ":" + model + ":" + driverName + ":"
+				+ passengerCapacity + ":" + availableString();
+	}
+}
