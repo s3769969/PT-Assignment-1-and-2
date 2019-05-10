@@ -61,7 +61,12 @@ public class Booking {
 			this.numPassengers = numPassengers;
 		}
 		
-		bookingFee = 1.50; //Sets default booking fee for each car as $1.50
+		// Checks if car is SS or not and assigns/gets booking fee
+		if (car instanceof SilverServiceCar) {
+			bookingFee = ((SilverServiceCar) car).getBookingFee();
+		}else {
+			bookingFee = 1.50; //Sets default booking fee for each car as $1.50
+		}
 		
 		//Creates booking ID based on corrected and reformatted arguments
 		id = car.getRegNo().toUpperCase() + "_" + firstName.toUpperCase().substring(0, 3)
@@ -123,6 +128,12 @@ public class Booking {
 	public double getBookingFee() {
 		return bookingFee;
 	}
+	
+	//Setter for booking fee double
+		public double setBookingFee(double bookingFee) {
+			this.bookingFee = bookingFee;
+			return bookingFee;
+		}
 	
 	//Getter for kilometers travelled string. Returns N/A, if booking not completed
 	public String travelled() {

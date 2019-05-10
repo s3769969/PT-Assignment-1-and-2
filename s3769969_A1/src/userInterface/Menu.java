@@ -314,11 +314,15 @@ public class Menu {
 			System.out.print("Enter Registration No ");
 			regNo = scanner.nextLine();
 			regNo = regNo.toUpperCase();
-			if (checkRegFormat(regNo) == false) {
-				System.out.println("Error - Registration number is invalid\n");
-			} else {
-				i = 1;
-			}
+			//try {
+				if (checkRegFormat(regNo) == false) {
+					System.out.println("Error - Registration number is invalid\n");
+				} else {
+					i = 1;
+				}
+//			}catch(InvalidId e){
+//				System.out.println(e.toString());
+//			}
 		}while(i == 0);
 		
 		system.searchByRegPrint(regNo); //
@@ -350,12 +354,13 @@ public class Menu {
 	
 	/*Checks format of string argument. Returns true if format matches regex pattern. Else,
 	returns false*/
-	public boolean checkRegFormat(String regNo) {
+	public boolean checkRegFormat(String regNo) /*throws InvalidId*/ {
 		
 		String regex = "[a-zA-Z]{3}[0-9]{3}";
 		if (regNo.length() == 6 && Pattern.matches(regex, regNo)) {
 			return true;
 		}else {
+			//throw new InvalidId(regNo);
 			return false;
 		}		
 	}
