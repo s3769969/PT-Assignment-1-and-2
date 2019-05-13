@@ -354,7 +354,7 @@ public class Menu {
 	
 	/*Checks format of string argument. Returns true if format matches regex pattern. Else,
 	returns false*/
-	public boolean checkRegFormat(String regNo) /*throws InvalidId*/ {
+	public static boolean checkRegFormat(String regNo) /*throws InvalidId*/ {
 		
 		String regex = "[a-zA-Z]{3}[0-9]{3}";
 		if (regNo.length() == 6 && Pattern.matches(regex, regNo)) {

@@ -2,6 +2,7 @@ package application;
 
 import utilities.DateTime;
 import application.Booking;
+import userInterface.Menu;
 
 /*
  * Class:			Car
@@ -18,6 +19,8 @@ public class Car {
 	private boolean available;
 	private Booking[] currentBookings;
 	private Booking[] pastBookings;
+	private double bookingFee;
+	private final double STANDARD_BOOKING_FEE = 1.5;
 
 	/*Creates Car object based on arguments. Changes arguments to satisfy rules before assigning them
 	to class variables.*/
@@ -25,10 +28,7 @@ public class Car {
 
 		/*Checks registration string format is in format 'ABC123' else defaults it to "ZZZ999".
 		Then converts to upper case and assigns to class variable.*/
-		if (regNo.length() != 6 || Character.isLetter(regNo.charAt(0)) != true
-			|| Character.isLetter(regNo.charAt(1)) != true || Character.isLetter(regNo.charAt(2)) != true
-			|| Character.isDigit(regNo.charAt(3)) != true || Character.isDigit(regNo.charAt(4)) != true
-			|| Character.isDigit(regNo.charAt(5)) != true) {
+		if (Menu.checkRegFormat(regNo)) {
 			this.regNo = "ZZZ999";
 		} else {
 			regNo = regNo.toUpperCase();

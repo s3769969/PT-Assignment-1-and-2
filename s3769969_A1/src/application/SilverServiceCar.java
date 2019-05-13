@@ -28,12 +28,6 @@ public class SilverServiceCar extends Car{
 			this.bookingFee = 3.00;
 		}
 		this.refreshments = refreshments;
-		this.currentBookings = super.currentBookings; //?? change to protected
-		super.setCurrentBookings(20); //using setter
-		super.getCurrentBookings(); //using getter
-		currentBookings = new Booking[20]; // Initialises currentBookings[] to 20 elements each SS car object ??create setter
-		pastBookings = new Booking[20]; // Initialises pastBookings[] to 20 elements for each SS car object
-		available = true; //Initialises available state of new SS car object as true
 	}
 	
 	@Override
