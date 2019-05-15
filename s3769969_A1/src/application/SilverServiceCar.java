@@ -10,7 +10,7 @@ import utilities.DateTime;
 public class SilverServiceCar extends Car{
 
 	private String[] refreshments;
-	private double bookingFee;
+	
 	
 //	Car car = new SilverServiceCar("SSC123", "Toyota", "Hilux", "Road Warrior", 9, 1.50, refreshments);
 //	Car car4 = (Car) new SilverServiceCar("SSC123", "Toyota", "Hilux", "Road Warrior", 9, 1.50, refreshments);
@@ -19,31 +19,28 @@ public class SilverServiceCar extends Car{
 //	Car car3 = (SilverServiceCar) car;
 	
 	
-	/*Creates SS Car object based on arguments. Changes arguments to satisfy rules before assigning them
-	to class variables.*/
+	/*Creates SS Car object based on arguments. Changes arguments to satisfy rules before assigning
+	them to class variables.*/
 	public SilverServiceCar(String regNo, String make, String model, String driverName,
 			int passengerCapacity, double bookingFee, String[] refreshments) {
 		super(regNo, make, model, driverName, passengerCapacity);
 		if (bookingFee < 3.00) {
-			this.bookingFee = 3.00;
+			setBookingFee(3.00);
 		}
 		this.refreshments = refreshments;
+		this.setTripFeeRate(0.4); //Assigns rate of 40% rate for SS Cars
 	}
 	
 	@Override
 	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) {
 		
-		DateTime currentExact = new DateTime(); //Initialises exact current DateTime object
-		String currentExactString = currentExact.getFormattedDate(); //Converts current DateTime to string
-		DateTime current = convertStringToTime(currentExactString); //Initialises DateTime to 12am today
-		
-		/*Checks required booking date more than 3 days in the future. If so, it is displays error and
-		returns false. Else passes through.*/
-		current = new DateTime();
-		int dayDiff = DateTime.diffDays(required, current);
+		/*Checks if required booking date is more than 3 days in the future. If so, it is displays
+		error and returns false. Else passes through.*/
+		DateTime current = new DateTime();
+		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff > 3) {
 			System.out.println("Error - Cannot book for more than 3 days in future.\n");
-					return false;
+			return false;
 		}
 		return super.book(firstName, lastName, required, numPassengers); //Returns booking through superclass
 		
@@ -109,24 +106,12 @@ public class SilverServiceCar extends Car{
 		return super.getPassengerCapacity();
 	}
 
-	public String pastBookingsToString() {
-		return "";
-	}
-	
 	public String[] getRefreshments() {
 		return refreshments;
 	}
 
 	public void setRefreshments(String[] refreshments) {
 		this.refreshments = refreshments;
-	}
-
-	public double getBookingFee() {
-		return bookingFee;
-	}
-
-	public void setBookingFee(double bookingFee) {
-		this.bookingFee = bookingFee;
 	}
 
 	@Override
@@ -138,25 +123,83 @@ public class SilverServiceCar extends Car{
 	public String availableString() {
 		return super.availableString();
 	}
+	
+	//Getter for booking fee double of SS Car
+	@Override
+	public double getBookingFee() {
+		return super.getBookingFee();
+	}
+
+	//Setter for booking fee double of SS Car
+	@Override
+	public void setBookingFee(double bookingFee) {
+		super.setBookingFee(bookingFee);
+	}
+
+	@Override
+	public double getTripFeeRate() {
+		return super.getTripFeeRate();
+	}
+
+	@Override
+	public void setTripFeeRate(double tripFeeRate) {
+		super.setTripFeeRate(tripFeeRate);
+	}
+
+	public Booking[] getCurrentBookings() {
+		return super.getCurrentBookings();
+	}
+
+	public void setCurrentBookings(Booking[] currentBookings) {
+		super.setCurrentBookings(currentBookings);
+	}
+
+	public Booking[] getPastBookings() {
+		return super.getPastBookings();
+	}
+
+	public void setPastBookings(Booking[] pastBookings) {
+		super.setPastBookings(pastBookings);
+	}
+	
+	public String currentBookingsToString(){ 
+		return "";
+	}
+	
+	public String pastBookingsToString(){
+		return "";
+	}
 
 	@Override
 	public String getDetails() {
-		return super.getDetails() + "Standard fee: " + getBookingFee() + "\n";
+		return super.getDetails() + "Standard Fee:\t\t" + this.getBookingFee() + "\n\nRefreshments"
+				+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + currentBookingsToString()
+				+ "PAST BOOKINGS" + pastBookingsToString();
 	}
-
+	
 	@Override
 	public String toString() {
-		return "RegNo:          " + regNo + "\n" + "Make and Model: " + make + " " + model + "\n"
-				+ "DriverName:     " + driverName + "\n" + "Capacity:       " + passengerCapacity
-				+ "\n" + "Available:      " + availableString() + "\n";;
+		return super.toString() + "Standard Fee:\t\t" + this.getBookingFee() + "\n\nRefreshments"
+				+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + currentBookingsToString()
+				+ "PAST BOOKINGS" + pastBookingsToString();
 	}
-
-	public String currentBookingsToString() {
-		
-		if (currentBookings[i] != null){
-			
+	
+	public String refreshmentsToString(String[] array) {
+		String items = null;
+		for (int i = 0; i < array.length; i++) {
+			int itemNum = i + 1;
+			items += "\n" + "Item " + itemNum + "\t\t" + array[i];
 		}
-		
-		return "";
+		return items;
+	}
+	
+	public String bookingsToString(String[] array) {
+		String items = null;
+		for (int i = 0; i < array.length; i++) {
+			int itemNum = i + 1;
+			items += "\n\t\t\t" + "---------------------------------------" +
+					"\n\t\t\t" + "Item " + itemNum + "\t\t" + array[i];
+		}
+		return items;
 	}
 }

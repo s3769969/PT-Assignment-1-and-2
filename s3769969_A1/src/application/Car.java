@@ -1,6 +1,7 @@
 package application;
 
 import utilities.DateTime;
+import java.util.regex.Pattern;
 import application.Booking;
 import userInterface.Menu;
 
@@ -21,6 +22,7 @@ public class Car {
 	private Booking[] pastBookings;
 	private double bookingFee;
 	private final double STANDARD_BOOKING_FEE = 1.5;
+	private double tripFeeRate;
 
 	/*Creates Car object based on arguments. Changes arguments to satisfy rules before assigning them
 	to class variables.*/
@@ -28,13 +30,15 @@ public class Car {
 
 		/*Checks registration string format is in format 'ABC123' else defaults it to "ZZZ999".
 		Then converts to upper case and assigns to class variable.*/
-		if (Menu.checkRegFormat(regNo)) {
-			this.regNo = "ZZZ999";
-		} else {
+		String regex = "[a-zA-Z]{3}[0-9]{3}";
+		if (regNo.length() == 6 && Pattern.matches(regex, regNo)) {
 			regNo = regNo.toUpperCase();
 			this.regNo = regNo;
+		} else {
+			this.regNo = "ZZZ999";
 		}
 
+		this.setTripFeeRate(0.3); //Assigns rate of 30% rate to Car
 		this.make = make; //Assigns make argument to class variable
 		this.model = model; //Assigns model argument to class variable
 		this.driverName = driverName; //Assigns driver name argument to class variable
@@ -73,10 +77,10 @@ public class Car {
 			}
 		}
 		
-		/*Checks if there are more than 4 elements in currentBookings array. If so, it is displays
+		/*Checks if there are 5 or more elements in currentBookings array. If so, it is displays
 		error, updates available status of car to false and returns false. Else, checks elements in
 		the array for null element. If the null element is the 5th element, available status is changed
-		to false and passes through loop.If next null element is <5th element, available status is set
+		to false and passes through loop. If next null element is <5th element, available status is set
 		to true and passes through the loop.*/
 		i = 0;
 		while(i < currentBookings.length) {
@@ -96,24 +100,16 @@ public class Car {
 			}
 		}
 		
-		/*Checks required booking date is in the past. If so, it is displays error and returns false.
-		Else passes through.*/
-		DateTime currentExact = new DateTime(); //Initialises exact current DateTime object
-		String currentExactString = currentExact.getFormattedDate(); //Converts current DateTime to string
-		DateTime current = convertStringToTime(currentExactString); //Initialises DateTime to 12am today
-		int dayDiff = DateTime.diffDays(required, current);
+		/*Checks if required booking date is in the past or more than 7 days in the future. If so, 
+		it is displays error and returns false. Else passes through.*/
+		DateTime current = new DateTime();
+		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff < 0) {
 			System.out.println("Error - Cannot book for past dates.\n");
 			return false;
-		}
-		
-		/*Checks required booking date more than 7 days in the future. If so, it is displays error and
-		returns false. Else passes through.*/
-		current = new DateTime();
-		dayDiff = DateTime.diffDays(required, current);
-		if (dayDiff > 7) {
+		}else if (dayDiff > 7) {
 			System.out.println("Error - Cannot book for more than 7 days in future.\n");
-					return false;
+			return false;
 		}
 		
 		/*Checks that number of passengers is not greater than car capacity. If so, it is displays
@@ -136,7 +132,6 @@ public class Car {
 				i++;
 			}
 		}
-		
 		return true; //Returns true once booking is made
 	}
 	
@@ -164,11 +159,9 @@ public class Car {
 	public String getTotalFee(Double kilometersTravelled, String firstName, String lastName){
 		
 		int i = 0; //Initialise local variable i
-		int j = 100; //Initialise local variable j out of booking array lengths
 		
-		/*Checks if arguments names match names in existing booking for car. If true overrides j with
-		index number for location of booking in currentBookings array. Else, passes through and j
-		remains 100*/
+		/*Checks if arguments names match names in past booking for car. If true, returns total fee.
+		Else, returns error message*/
 		while(i < pastBookings.length) {
 			if (pastBookings[i] == null) {
 				i = currentBookings.length;
@@ -211,21 +204,26 @@ public class Car {
 		i = 0;
 		if (j != 100) {
 			while(i < pastBookings.length) {
-			if (pastBookings[i] == null) {
-				pastBookings[i] = currentBookings[j];
-				pastBookings[i].setKilometersTravelled(kilometersTravelled);
-			}else {
-				i++;
-			}
+				if (pastBookings[i] == null) {
+					pastBookings[i] = currentBookings[j];
+					pastBookings[i].setKilometersTravelled(kilometersTravelled);
+				}else {
+					i++;
+				}
 			}
 		}
 		
 		/*Then overrides currentBookings element that was copied to pastBookings[] with next element
 		in currentBookings array, only if booking was copied. Then all elements in currentBookings
 		after index j are moved down 1 index.*/
-		while (j + 1 < currentBookings.length) {
-			currentBookings[j] = currentBookings[j + 1];
-			j++;
+		while (j < currentBookings.length) {
+			if (j == currentBookings.length - 1) {
+				currentBookings[j] = null;
+				j = currentBookings.length;
+			}else {
+				currentBookings[j] = currentBookings[j + 1];
+				j++;
+			}
 		}
 		
 		if (j == 100) {
@@ -331,11 +329,45 @@ public class Car {
 		}
 	}
 
+	//Getter for booking fee double of Car
+	public double getBookingFee() {
+		return bookingFee;
+	}
+
+	//Setter for booking fee double of Car
+	public void setBookingFee(double bookingFee) {
+		this.bookingFee = bookingFee;
+	}
+
+	public double getTripFeeRate() {
+		return tripFeeRate;
+	}
+
+	public void setTripFeeRate(double tripFeeRate) {
+		this.tripFeeRate = tripFeeRate;
+	}
+	
+	public Booking[] getCurrentBookings() {
+		return currentBookings;
+	}
+
+	public void setCurrentBookings(Booking[] currentBookings) {
+		this.currentBookings = currentBookings;
+	}
+
+	public Booking[] getPastBookings() {
+		return pastBookings;
+	}
+
+	public void setPastBookings(Booking[] pastBookings) {
+		this.pastBookings = pastBookings;
+	}
+
 	//Getter for Car details in human readable format
 	public String getDetails() {
-		return "RegNo:          " + regNo + "\n" + "Make and Model: " + make + " " + model + "\n"
-				+ "DriverName:     " + driverName + "\n" + "Capacity:       " + passengerCapacity
-				+ "\n" + "Available:      " + availableString() + "\n";
+		return "RegNo:\t\t\t" + regNo + "\n" + "Make and Model:\t\t" + make + " " + model + "\n"
+				+ "DriverName:\t\t" + driverName + "\n" + "Capacity:\t\t" + passengerCapacity
+				+ "\n" + "Available:\t\t" + availableString() + "\n";
 	}
 
 	//Getter for Car details in predefined format for computer

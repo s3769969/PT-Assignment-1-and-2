@@ -119,8 +119,8 @@ public class Booking {
 	}
 
 	//Getter for trip fee double
-	public double getTripFee() {
-		tripFee = kilometersTravelled * bookingFee * 0.3;
+	public double getTripFee(Double tripFeeRate) {
+		tripFee = kilometersTravelled * bookingFee * tripFeeRate;
 		return tripFee ;
 	}
 	

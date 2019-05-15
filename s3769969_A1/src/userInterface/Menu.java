@@ -75,7 +75,7 @@ public class Menu {
 		
 		//Awaits user input for registration number string and converts it to upper case
 		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter Registration No ");
+		System.out.print("Enter Registration No: ");
 		String regNo = scanner.nextLine().toUpperCase();
 		
 		/*Checks string format and if format is not "abc123" returns to display menu else passes
@@ -89,18 +89,18 @@ public class Menu {
 		}
 	
 		//Records user input car details for new car creation
-		System.out.print("Enter make ");
+		System.out.print("Enter make: ");
 		String make = scanner.nextLine();
-		System.out.print("Enter model ");
+		System.out.print("Enter model: ");
 		String model = scanner.nextLine();
-		System.out.print("Enter Driver's Name ");
+		System.out.print("Enter Driver's Name: ");
 		String driverName = scanner.nextLine();
 
 		//Loop where user enters input for passenger number and loops ends when number is between 1-9
 		int i = 0;
 		int passengerCapacity;
 		do {
-			System.out.print("Enter Passenger Capacity ");
+			System.out.print("Enter Passenger Capacity: ");
 			passengerCapacity = scanner.nextInt();
 			if (passengerCapacity < 1 || passengerCapacity > 9) {
 				System.out.println("Error - Passenger Capacity is invalid\n");
@@ -109,11 +109,29 @@ public class Menu {
 			}
 		} while (i == 0);
 
-		/*Checks if the car is in the allCars array and depending on outcome then adds car it and
+		System.out.print("Enter Service Type (SD/SS): ");
+		String serviceType = scanner.nextLine();
+		
+		double bookingFee = 0.0;
+		String refreshments = null;
+		//Checks if Car is SS and asks for more input details
+		if (serviceType.equalsIgnoreCase("SS")) {
+			System.out.print("Enter Standard Fee: ");
+			bookingFee = scanner.nextDouble();
+			System.out.print("Enter List of Refreshments: ");
+			refreshments = scanner.nextLine();
+		}
+		
+		/*Checks if the car is in the allCars array and depending on outcome then adds car or SS car and
 		prints response*/ 
 		if (system.checkCar(regNo)  == false) {
-			system.addCar(regNo, make, model, driverName, passengerCapacity);		
-			System.out.println("New Car successfully added for registration number: " + regNo + "\n");
+			if (serviceType.equalsIgnoreCase("SS")) {
+				system.addCar(regNo, make, model, driverName, passengerCapacity, bookingFee, refreshments);
+				System.out.println("New SS Car successfully added for registration number: " + regNo + "\n");
+			}else {
+				system.addCar(regNo, make, model, driverName, passengerCapacity);	
+				System.out.println("New Car successfully added for registration number: " + regNo + "\n");
+			}	
 		}else {
 			System.out.println("Error - " + regNo + " already exists in system\n");
 		}
@@ -354,7 +372,7 @@ public class Menu {
 	
 	/*Checks format of string argument. Returns true if format matches regex pattern. Else,
 	returns false*/
-	public static boolean checkRegFormat(String regNo) /*throws InvalidId*/ {
+	public boolean checkRegFormat(String regNo) /*throws InvalidId*/ {
 		
 		String regex = "[a-zA-Z]{3}[0-9]{3}";
 		if (regNo.length() == 6 && Pattern.matches(regex, regNo)) {

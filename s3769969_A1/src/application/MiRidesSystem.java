@@ -125,6 +125,24 @@ public class MiRidesSystem {
 		}
 	}
 	
+	/*Uses car instance variables as argument to create Car object. Then adds Car object to allCars
+	array if element index is empty, else looks for next empty element index and adds it there*/
+	public void addCar(String regNo, String make, String model, String driverName, 
+			int passengerCapacity, double bookingFee, String refreshmentsList) {
+		
+		String[] refreshments = refreshmentsList.split(",");
+		Car car = new SilverServiceCar(regNo, make, model, driverName, passengerCapacity, bookingFee, refreshments);
+		int i = 0;
+		while(i < allCars.length) {
+			if (allCars[i] == null) {
+				allCars[i] = car;
+				i = allCars.length;
+			}else {
+				i++;
+			}
+		}
+	}
+	
 	/*Checks Car object argument and passes all argument data to book method in Car class and checks
 	if booking can be made. If matching car is found in allCars array and booking can be made, then
 	booking has been made and returns true. Else, returns false.*/
