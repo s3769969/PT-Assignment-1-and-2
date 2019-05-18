@@ -109,6 +109,7 @@ public class Menu {
 			}
 		} while (i == 0);
 
+		String fix = scanner.nextLine();
 		System.out.print("Enter Service Type (SD/SS): ");
 		String serviceType = scanner.nextLine();
 		
@@ -118,6 +119,7 @@ public class Menu {
 		if (serviceType.equalsIgnoreCase("SS")) {
 			System.out.print("Enter Standard Fee: ");
 			bookingFee = scanner.nextDouble();
+			fix = scanner.nextLine();
 			System.out.print("Enter List of Refreshments: ");
 			refreshments = scanner.nextLine();
 		}

@@ -419,24 +419,40 @@ public class MiRidesSystem {
 	using the hardcoded travel distances. */
 	public void seedData() {
 		
+		String[] rsscar0 = {"coke", "smokes", "therapy"};
+		String[] rsscar1 = {"coke", "smokes", "therapy"};
+		String[] rsscar2 = {"coke", "smokes", "therapy"};
+		String[] rsscar3 = {"coke", "smokes", "therapy"};
+		String[] rsscar4 = {"coke", "smokes", "therapy"};
+		String[] rsscar5 = {"coke", "smokes", "therapy"};
+		
 		//Instantiates 6 hardcoded car objects
 		Car car0 = new Car("MJB007", "Aston Martin", "DB4", "James Bond", 5);
-		Car car1 = new Car("ARC237", "Alfa Romeo", "4C", "Posh Spice", 2);
+		Car car1 = new Car("SPD777", "Straight Flush", "Spades", "Lucky Slevin", 7);
 		Car car2 = new Car("CTR999", "SCE", "Naughty Dog", "Crash Bandicoot", 1);
-		Car car3 = new Car("GGG123", "Cadillac", "Pimpmobile", "Snoop Dogg", 9);
-		Car car4 = new Car("SSS001", "Rolls-Royce", "Phantom", "Jeeves Sir", 8);
-		Car car5 = new Car("VVV888", "Chevrolet", "Corvette Z06", "Richie Rich", 4);
+		Car car3 = new Car("ODD101", "Binary", "1011", "On Off", 2);
+		Car car4 = new Car("TTT333", "Judgement Day", "T3", "John Connor", 3);
+		Car car5 = new Car("WHY909", "Renaming", "Sucks", "Random Guy", 5);
+		Car sscar0 = new SilverServiceCar("IAD666", "Lincoln", "Limosine", "Bruce Willis", 6, 6.60, rsscar0);
+		Car sscar1 = new SilverServiceCar("ARC237", "Alfa Romeo", "4C", "Posh Spice", 4, 5.50, rsscar1);
+		Car sscar2 = new SilverServiceCar("SSS001", "Rolls-Royce", "Phantom", "Jeeves Sir", 8, 3.50, rsscar2);
+		Car sscar3 = new SilverServiceCar("VVV888", "Chevrolet", "Corvette Z06", "Richie Rich", 4, 4.00, rsscar3);
+		Car sscar4 = new SilverServiceCar("JDI001", "Phantom", "Menace", "Anakin Skywalker", 3, 3.00, rsscar4);
+		Car sscar5 = new SilverServiceCar("GGG123", "Cadillac", "Pimpmobile", "Snoop Dogg", 9, 9.99, rsscar5);
+		
 	
 		//Instantiates 4 DateTime objects based on current system time
-		DateTime req2 = new DateTime(5);
-		DateTime req3 = new DateTime(7);
-		DateTime req4 = new DateTime(0);
-		DateTime req5 = new DateTime(0);
+		DateTime today = new DateTime(0);  
+		DateTime req1 = new DateTime(1);
+		DateTime req3 = new DateTime(3);
+		DateTime req5 = new DateTime(5);
+		DateTime req7 = new DateTime(7);
 		
-		/*Checks allCars array to see if any car reg is already in the system. If not it adds the 6 
-		Car objects to the array. Then books 4 Cars using the 4 DateTime objects and 4 hardcoded
-		booking instance variables and completes the booking for the last 2 cars using the hardcoded
-		travel distances. Prints success message if last car is added. Else, prints error message.*/
+		/*Checks allCars array to see if any car reg is already in the system. If not it adds the 12 
+		Car objects to the array. Then books 8 Cars(4SS + 4SD) using the 5 DateTime objects and 8
+		hardcoded booking instance variables and completes the booking for the last 4 cars(2SS + 2SD)
+		using the hardcoded	travel distances. Prints success message if last car is added. Else, prints
+		error message.*/
 		if (checkCar(car0) == false) {
 			addCar(car0);
 		}
@@ -445,25 +461,72 @@ public class MiRidesSystem {
 		}
 		if (checkCar(car2) == false) {
 			addCar(car2);
-			bookCar(car2, "Lone", "Wolf", req2, 1);
+			bookCar(car2, "Lone", "Dog", req5, 1);
 		}
 		if (checkCar(car3) == false) {
 			addCar(car3);
-			bookCar(car3, "John", "Doe", req3, 2);
+			bookCar(car3, "John", "Doe", req7, 2);
 		}
 		if (checkCar(car4) == false) {
 			addCar(car4);
-			bookCar(car4, "Stacie", "Triumph", req4, 3);
-			completeBookingWithDate(req4.getFormattedDate(), 43.0, "Stacie", "Triumph");
+			bookCar(car4, "Stacie", "Triumph", today, 3);
+			completeBookingWithDate(today.getFormattedDate(), 43.0, "Stacie", "Triumph");
 		}
 		if (checkCar(car5) == false) {
 			addCar(car5);
-			bookCar(car5, "Jack", "Familyman", req5, 4);
-			completeBookingWithDate(req5.getFormattedDate(), 21.5, "Jack", "Familyman");
-			System.out.println("Seeded Data has been added to system\n");		
+			bookCar(car5, "Jack", "Familyman", today, 4);
+			completeBookingWithDate(today.getFormattedDate(), 21.5, "Jack", "Familyman");	
+		}if (checkCar(sscar0) == false) {
+			addCar(sscar0);
+		}
+		if (checkCar(sscar1) == false) {
+			addCar(sscar1);
+		}
+		if (checkCar(sscar2) == false) {
+			addCar(sscar2);
+			bookCar(sscar2, "Lone", "Wolf", req1, 1);
+		}
+		if (checkCar(sscar3) == false) {
+			addCar(sscar3);
+			bookCar(sscar3, "Jane", "Doe", req3, 2);
+		}
+		if (checkCar(sscar4) == false) {
+			addCar(sscar4);
+			bookCar(sscar4, "Obi-Wan", "Kenobi", today, 3);
+			completeBookingWithDate(today.getFormattedDate(), 43.0, "Obi-Wan", "Kenobi");
+		}
+		if (checkCar(sscar5) == false) {
+			addCar(sscar5);
+			bookCar(sscar5, "Ladies", "Man", today, 4);
+			completeBookingWithDate(today.getFormattedDate(), 21.5, "Ladies", "Man");
+			System.out.println("Seeded Data has been added to system\n");
 		}else {
 			System.out.println("Error - Seeded Data has already been added to system\n");
 		}
 	}	
+	
+	public Car[] sortSS() {
+		int j = 0;
+		Car[] ss = new Car[allCars.length];
+		for (int i = 0; i< allCars.length; i++) {
+			if (allCars[i] instanceof SilverServiceCar) {
+				ss[j] = allCars[i];
+				j++;
+			}
+		}	
+			return ss;
+	}
+	
+	public Car[] sortSD() {
+		int j = 0;
+		Car[] sd = new Car[allCars.length];
+		for (int i = 0; i< allCars.length; i++) {
+			if (allCars[i] instanceof SilverServiceCar == false) {
+				sd[j] = allCars[i];
+				j++;
+			}
+		}
+		return sd;
+	}
 	
 }

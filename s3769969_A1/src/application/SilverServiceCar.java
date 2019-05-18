@@ -26,6 +26,8 @@ public class SilverServiceCar extends Car{
 		super(regNo, make, model, driverName, passengerCapacity);
 		if (bookingFee < 3.00) {
 			setBookingFee(3.00);
+		}else {
+			setBookingFee(bookingFee);
 		}
 		this.refreshments = refreshments;
 		this.setTripFeeRate(0.4); //Assigns rate of 40% rate for SS Cars
@@ -172,34 +174,45 @@ public class SilverServiceCar extends Car{
 
 	@Override
 	public String getDetails() {
-		return super.getDetails() + "Standard Fee:\t\t" + this.getBookingFee() + "\n\nRefreshments"
-				+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + currentBookingsToString()
-				+ "PAST BOOKINGS" + pastBookingsToString();
+		return super.getDetails() + "Standard Fee:\t\t$" + this.getBookingFee() + "\n\nRefreshments"
+		+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + 
+		bookingsToString(getCurrentBookings()) + "PAST BOOKINGS" + bookingsToString(getPastBookings());
 	}
 	
 	@Override
 	public String toString() {
-		return super.toString() + "Standard Fee:\t\t" + this.getBookingFee() + "\n\nRefreshments"
-				+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + currentBookingsToString()
-				+ "PAST BOOKINGS" + pastBookingsToString();
+		return super.toString() + "Standard Fee:\t\t$" + this.getBookingFee() + "\n\nRefreshments"
+		+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + 
+		bookingsToString(getCurrentBookings()) + "PAST BOOKINGS" + bookingsToString(getPastBookings());
 	}
 	
-	public String refreshmentsToString(String[] array) {
-		String items = null;
-		for (int i = 0; i < array.length; i++) {
-			int itemNum = i + 1;
-			items += "\n" + "Item " + itemNum + "\t\t" + array[i];
+	public String refreshmentsToString(String[] refreshments) {
+		if (refreshments[0] == null) {
+			return "No refreshments provided";
 		}
-		return items;
+		String items = "";
+		for (int i = 0; i < refreshments.length; i++) {
+			int itemNum = i + 1;
+			items += "Item " + itemNum + "\t\t" + refreshments[i].trim() + "\n";
+		}
+		return items + "\n";
 	}
 	
-	public String bookingsToString(String[] array) {
-		String items = null;
-		for (int i = 0; i < array.length; i++) {
-			int itemNum = i + 1;
-			items += "\n\t\t\t" + "---------------------------------------" +
-					"\n\t\t\t" + "Item " + itemNum + "\t\t" + array[i];
+	public String bookingsToString(Booking[] bookings) {
+		if (bookings[0] == null) {
+			return "\n\t\t\t" + "---------------------------------------\n" + 
+		"\t\t\tNo bookings found\n\n";
 		}
-		return items;
+		String booking = "";
+		int i = 0;
+		while (bookings[i] != null || i == bookings.length) {
+			booking += "\n\t\t\t" + "---------------------------------------\n";
+			String lines[] = bookings[i].getDetails().split("\\r?\\n");
+			for (String string : lines) {
+				booking += "\t\t\t" + string + "\n";
+			}
+			i++;		
+		}
+		return booking;
 	}
 }

@@ -21,7 +21,7 @@ public class Car {
 	private Booking[] currentBookings;
 	private Booking[] pastBookings;
 	private double bookingFee;
-	private final double STANDARD_BOOKING_FEE = 1.5;
+	private final double STANDARD_BOOKING_FEE = 1.50;
 	private double tripFeeRate;
 
 	/*Creates Car object based on arguments. Changes arguments to satisfy rules before assigning them
@@ -207,6 +207,7 @@ public class Car {
 				if (pastBookings[i] == null) {
 					pastBookings[i] = currentBookings[j];
 					pastBookings[i].setKilometersTravelled(kilometersTravelled);
+					i = pastBookings.length;
 				}else {
 					i++;
 				}
