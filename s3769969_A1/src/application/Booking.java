@@ -40,7 +40,7 @@ public class Booking {
 	 	than 7 days in future pickUpDateTime is made to current DateTime. Else, it remains as the
 	 	argument. Then is assigned to class variable*/ 
 		DateTime current = new DateTime();
-		int dayDiff = DateTime.diffDays(required, current);
+		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff > 7 || dayDiff < 0) {
 			required = current;
 			this.pickUpDateTime = current;
@@ -59,13 +59,6 @@ public class Booking {
 			this.numPassengers = 1;
 		}else {
 			this.numPassengers = numPassengers;
-		}
-		
-		// Checks if car is SS or not and assigns/gets booking fee
-		if (car instanceof SilverServiceCar) {
-			bookingFee = ((SilverServiceCar) car).getBookingFee();
-		}else {
-			bookingFee = 1.50; //Sets default booking fee for each car as $1.50
 		}
 		
 		//Creates booking ID based on corrected and reformatted arguments
@@ -143,20 +136,38 @@ public class Booking {
 			return "N/A";
 	}
 	
+	//Getter for kilometers travelled for toString method. Returns 0.0, if booking not completed
+	public String travelledToString() {
+		if (getKilometersTravelled() != 0) {
+			return "" + kilometersTravelled;
+		} else
+			return "0.0";
+	}
+	
 	//Getter for trip fee string. Returns N/A, if booking not completed
 	public String tripFee() {
 		if (getKilometersTravelled() != 0) {
-			tripFee = kilometersTravelled * bookingFee * 0.3;
+			tripFee = kilometersTravelled * bookingFee * this.getCar().getTripFeeRate();
 			String tripFeeTo2Decimals = String.format("%.2f", tripFee);
 			return "" + tripFeeTo2Decimals;
 		} else
 			return "N/A";
 	}
 	
+	//Getter for trip fee cost for toString. Returns 0.0, if booking not completed
+	public String tripFeeToString() {
+		if (getKilometersTravelled() != 0) {
+			tripFee = kilometersTravelled * bookingFee * this.getCar().getTripFeeRate();
+			String tripFeeTo2Decimals = String.format("%.2f", tripFee);
+			return "" + tripFeeTo2Decimals;
+		} else
+			return "0.0";
+	}
+	
 	//Getter for total fee string. Returns N/A, if booking not completed
 	public String totalFee() {
 		if (getKilometersTravelled() != 0) {
-			double totalFee = bookingFee + kilometersTravelled * bookingFee * 0.3;
+			double totalFee = bookingFee + kilometersTravelled * bookingFee * this.getCar().getTripFeeRate();
 			String totalFeeTo2Decimals = String.format("%.2f", totalFee);
 			return "" + totalFeeTo2Decimals;
 		} else
@@ -176,7 +187,7 @@ public class Booking {
 	//Getter for Booking details in predefined format for computer
 	public String toString() {
 		return id + ":" + bookingFee + ":" + pickUpDateTime.getEightDigitDate() + ":"
-		+ firstName + " " + lastName + ":" + numPassengers + ":" + travelled() + ":"
-		+ tripFee + ":" + car.getRegNo().toUpperCase();
+		+ firstName + " " + lastName + ":" + numPassengers + ":" + travelledToString() + ":"
+		+ tripFeeToString() + ":" + car.getRegNo().toUpperCase();
 	}
 }

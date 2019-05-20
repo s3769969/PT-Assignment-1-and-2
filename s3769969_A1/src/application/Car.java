@@ -3,7 +3,6 @@ package application;
 import utilities.DateTime;
 import java.util.regex.Pattern;
 import application.Booking;
-import userInterface.Menu;
 
 /*
  * Class:			Car
@@ -38,7 +37,8 @@ public class Car {
 			this.regNo = "ZZZ999";
 		}
 
-		this.setTripFeeRate(0.3); //Assigns rate of 30% rate to Car
+		this.bookingFee = STANDARD_BOOKING_FEE; // Assigns standard booking fee to SD Car
+		this.setTripFeeRate(0.3); //Assigns rate of 30% rate to SD Car
 		this.make = make; //Assigns make argument to class variable
 		this.model = model; //Assigns model argument to class variable
 		this.driverName = driverName; //Assigns driver name argument to class variable
@@ -52,42 +52,83 @@ public class Car {
 		} else {
 			this.passengerCapacity = passengerCapacity;
 		}
-		currentBookings = new Booking[20]; // Initialises currentBookings[] to 20 elements each car object
-		pastBookings = new Booking[20]; // Initialises pastBookings[] to 20 elements for each car object
+		currentBookings = new Booking[5]; // Initialises currentBookings[] to 5 elements for each car object
+		pastBookings = new Booking[5]; // Initialises pastBookings[] to 5 elements for each car object
 		available = true; //Initialises available state of new car object as true
 	}
 
 	/*Booking method for Car. Takes arguments and checks that it satisfies rules. If all rules are
 	  satisfied a booking is made and method returns true. Otherwise method returns false. If 5 
 	  bookings exist in currentBookings array then method updates available variable to false.*/
-	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) {
+	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) throws InvalidPassCapException, InvalidBookingException {
 		
-		/*Checks booking date is not already in currentBookings array. If so, it is displays error
-		and returns false. Else passes through.*/
+		//Checks booking date is available and return true/false
+		boolean dateAvailable = false;
+		dateAvailable = checkForDoubleBooking(required);
+		//Checks no more than 5 current bookings, returns true/false and updates available status
+		boolean bookingLimit = false;
+		bookingLimit = checkForOverBooking(required);
+		//Checks date is not in the past or more than a week ahead
+		boolean validDate = false;
+		validDate = checkValidDate(required);
+				
+		/*Checks that number of passengers is not greater than car capacity. If so, it is displays
+		error and returns false. Else passes through.*/
+		if(numPassengers > passengerCapacity) {
+			throw new InvalidPassCapException("Error - Number of passengers exceeds passenger capacity for this car.\n");
+		}
+		
+		/*Creates new booking object using arguments in currentBookings array if element is null. Else
+		checks for next null element in the array and references booking there*/
+		
+		int i = 0;
+		if (dateAvailable && bookingLimit && validDate) {
+			Booking booking = new Booking(firstName, lastName, required, numPassengers, this);
+			booking.setBookingFee(this.bookingFee);
+			while(i < currentBookings.length) {
+				if (currentBookings[i] == null) {
+					currentBookings[i] = booking;
+					i = currentBookings.length;
+				}else {
+					i++;
+				}
+			}
+		}else {
+			return false;
+		}
+		return true; //Returns true once booking is made
+	}
+	
+	/*Checks booking date is not already in currentBookings array. If so, it is displays error
+	and returns false. Else passes through.*/
+	public boolean checkForDoubleBooking(DateTime required) throws InvalidBookingException {
+	
 		int i = 0; 
 		while(i < currentBookings.length) {
 			if (currentBookings[i] == null){
 				i = currentBookings.length;
 			}else if (currentBookings[i].getFormattedPickUpDate().equals(required.getFormattedDate())) {
-				System.out.println("Error - Car can only be booked once per day.\n");
-				return false;
+				throw new InvalidBookingException("Error - Car can only be booked once per day.\n");
 			}else if (currentBookings[i].getFormattedPickUpDate().equals(required.getFormattedDate())
 				== false){
 				i++;
 			}
 		}
+		return true;
+	}
+	
+	/*Checks if there are 5 or more elements in currentBookings array. If so, it is displays
+	error, updates available status of car to false and returns false. Else, checks elements in
+	the array for null element. If the null element is the 5th element, available status is changed
+	to false and passes through loop. If next null element is <5th element, available status is set
+	to true and passes through the loop.*/
+	public boolean checkForOverBooking(DateTime required) throws InvalidDateException {
 		
-		/*Checks if there are 5 or more elements in currentBookings array. If so, it is displays
-		error, updates available status of car to false and returns false. Else, checks elements in
-		the array for null element. If the null element is the 5th element, available status is changed
-		to false and passes through loop. If next null element is <5th element, available status is set
-		to true and passes through the loop.*/
-		i = 0;
-		while(i < currentBookings.length) {
+		int i = 0;
+		do {
 			if (i > 4) {
-				System.out.println("Error - Car can only have 5 current bookings.\n");
 				available = false;
-				return false;
+				throw new InvalidDateException("Error - Car can only have 5 current bookings.\n");
 			}else if (currentBookings[i] == null){
 				if (i < 4){
 					available = true;
@@ -98,41 +139,22 @@ public class Car {
 			}else if (currentBookings[i] != null){
 				i++;
 			}
-		}
+		} while(i < currentBookings.length);
+		return true;
+	}
+	
+	/*Checks if required booking date is in the past or more than 7 days in the future. If so, 
+	it is displays error and returns false. Else passes through.*/
+	public boolean checkValidDate(DateTime required) throws InvalidDateException {
 		
-		/*Checks if required booking date is in the past or more than 7 days in the future. If so, 
-		it is displays error and returns false. Else passes through.*/
 		DateTime current = new DateTime();
 		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff < 0) {
-			System.out.println("Error - Cannot book for past dates.\n");
-			return false;
+			throw new InvalidDateException("Error - Cannot book for days in the past.\n");
 		}else if (dayDiff > 7) {
-			System.out.println("Error - Cannot book for more than 7 days in future.\n");
-			return false;
+			throw new InvalidDateException("Error - Cannot book for more than 7 days in future.\n");
 		}
-		
-		/*Checks that number of passengers is not greater than car capacity. If so, it is displays
-		error and returns false. Else passes through.*/
-		if(numPassengers > passengerCapacity) {
-			System.out.println("Error - Number of passengers exceeds passenger capacity for this car.\n");
-			return false;
-		}
-		
-		/*Creates new booking object using arguments in currentBookings array if element is null. Else
-		checks for next null element in the array and references booking there*/
-		Booking booking = new Booking(firstName, lastName, required, numPassengers, this);
-		
-		i = 0;
-		while(i < currentBookings.length) {
-			if (currentBookings[i] == null) {
-				currentBookings[i] = booking;
-				i = currentBookings.length;
-			}else {
-				i++;
-			}
-		}
-		return true; //Returns true once booking is made
+		return true;
 	}
 	
 	/*Checks string argument for date match in currentBookings array. If found, returns booking ID.
@@ -144,11 +166,9 @@ public class Car {
 			if (currentBookings[i] == null){
 				System.out.println("Error - No booking reference found.\n");
 				i = currentBookings.length;
-			}else if (currentBookings[i].getPickUpDateTime().getFormattedDate().equals
-					(required.getFormattedDate())){
+			}else if (currentBookings[i].getFormattedPickUpDate().equals(required.getFormattedDate())){
 				return currentBookings[i].getId();
-			}else if (currentBookings[i].getPickUpDateTime().getFormattedDate().equals
-					(required.getFormattedDate()) == false){
+			}else if (currentBookings[i].getFormattedPickUpDate().equals(required.getFormattedDate()) == false){
 				i++;
 			}
 		}
@@ -164,7 +184,7 @@ public class Car {
 		Else, returns error message*/
 		while(i < pastBookings.length) {
 			if (pastBookings[i] == null) {
-				i = currentBookings.length;
+				i = pastBookings.length;
 			}else if (pastBookings[i].getFirstName().equalsIgnoreCase(firstName) &&
 					pastBookings[i].getLastName().equalsIgnoreCase(lastName) &&
 					pastBookings[i].getKilometersTravelled() == kilometersTravelled) {
@@ -367,13 +387,48 @@ public class Car {
 	//Getter for Car details in human readable format
 	public String getDetails() {
 		return "RegNo:\t\t\t" + regNo + "\n" + "Make and Model:\t\t" + make + " " + model + "\n"
-				+ "DriverName:\t\t" + driverName + "\n" + "Capacity:\t\t" + passengerCapacity
-				+ "\n" + "Available:\t\t" + availableString() + "\n";
+		+ "DriverName:\t\t" + driverName + "\n" + "Capacity:\t\t" + passengerCapacity + "\nStandard Fee:\t\t$"
+		+ String.format("%.2f", this.getBookingFee()) + "\nAvailable:\t\t" + availableString() + "\n\nCURRENT BOOKINGS" + 
+		bookingsGetDetails(getCurrentBookings()) + "\nPAST BOOKINGS" + bookingsGetDetails(getPastBookings());
+	}
+	
+	//Returns string for all current/past bookings in human readable format
+	public String bookingsGetDetails(Booking[] bookings) {
+		if (bookings[0] == null) {
+			return "\n\t\t\t" + "__________________________________________\n" + 
+		"\t\t\tNo bookings found\n\n";
+		}
+		String booking = "\n";
+		int i = 0;
+		while (bookings[i] != null || i == bookings.length) {
+			booking += "\n\t\t\t" + "__________________________________________\n";
+			String lines[] = bookings[i].getDetails().split("\\r?\\n");
+			for (String string : lines) {
+				booking += "\t\t\t" + string + "\n";
+			}
+			i++;		
+		}
+		return booking;
 	}
 
 	//Getter for Car details in predefined format for computer
 	public String toString() {
-		return regNo.toUpperCase() + ":" + make + ":" + model + ":" + driverName + ":"
-				+ passengerCapacity + ":" + availableString();
+		return regNo.toUpperCase() + ":" + make + ":" + model + ":" + driverName + ":" + passengerCapacity
+		+ ":" + availableString() + ":" + String.format("%.2f", this.getBookingFee()) + 
+		bookingsToString(getCurrentBookings()) + bookingsToString(getPastBookings());
+	}
+	
+	//Returns string for all current/past bookings in predefined format for computer
+	public String bookingsToString(Booking[] bookings) {
+		if (bookings[0] == null) {
+			return "";
+		}
+		String booking = "";
+		int i = 0;
+		while (bookings[i] != null || i == bookings.length) {
+			booking += "\n|" + bookings[i].toString();
+			i++;		
+		}
+		return booking;
 	}
 }

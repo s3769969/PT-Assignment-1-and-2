@@ -1,7 +1,11 @@
-package application;
+package userInterface;
 
-import java.util.Scanner;
 import application.Car;
+import application.InvalidBookingException;
+import application.InvalidDateException;
+import application.InvalidPassCapException;
+import application.InvalidRefreshmentsException;
+import application.SilverServiceCar;
 import utilities.DateTime;
 
 /*
@@ -14,6 +18,7 @@ public class MiRidesSystem {
 	
 	private Car[] allCars;
 	private Car[] availableCars;
+	private Car[] availableCarsForDate;
 	
 	public MiRidesSystem() {
 		
@@ -21,7 +26,7 @@ public class MiRidesSystem {
 	
 	//calls method to create allCars array
 	public void createAllCarsArray() {
-		allCars = new Car[100];
+		allCars = new Car[20];
 	}
 
 	/*Checks registrations no of two cars and returns true if the same as another otherwise returns
@@ -71,7 +76,7 @@ public class MiRidesSystem {
 
 	/*Checks reg number against allCars arrays for match. Returns true if reg no matches, else
 	returns false*/
-	public boolean checkCar(String regNo) {
+	public boolean checkCar(String regNo) throws InvalidRegException{
 		
 		int i = 0;
 		boolean outcome = false; 
@@ -79,8 +84,7 @@ public class MiRidesSystem {
 			if (allCars[i] == null){
 				i = allCars.length;
 			}else if (equalsRegNo(allCars[i].getRegNo(), regNo) == true){
-				outcome = true;
-				i = allCars.length;
+				throw new InvalidRegException("\"Error - " + regNo + " already exists in system\n");
 			}else if (equalsRegNo(allCars[i].getRegNo(), regNo) == false){
 				i++;
 			}
@@ -128,7 +132,7 @@ public class MiRidesSystem {
 	/*Uses car instance variables as argument to create Car object. Then adds Car object to allCars
 	array if element index is empty, else looks for next empty element index and adds it there*/
 	public void addCar(String regNo, String make, String model, String driverName, 
-			int passengerCapacity, double bookingFee, String refreshmentsList) {
+			int passengerCapacity, double bookingFee, String refreshmentsList) throws InvalidRefreshmentsException {
 		
 		String[] refreshments = refreshmentsList.split(",");
 		Car car = new SilverServiceCar(regNo, make, model, driverName, passengerCapacity, bookingFee, refreshments);
@@ -147,18 +151,18 @@ public class MiRidesSystem {
 	if booking can be made. If matching car is found in allCars array and booking can be made, then
 	booking has been made and returns true. Else, returns false.*/
 	public boolean bookCar(Car car, String firstName, String lastName, DateTime required, 
-			int numPassengers) {
+			int numPassengers) throws InvalidPassCapException, InvalidBookingException {
 		
 		int i = 0;
 		while(i < allCars.length) {
 			if (allCars[i] == null) {
 				i = allCars.length;
 			}else if (equalsCar(allCars[i], car) == true){
-				if (allCars[i].book(firstName, lastName, required, numPassengers) == true) {
-					return true;
-				}else {
-					return false;
-				}				
+					if (allCars[i].book(firstName, lastName, required, numPassengers) == true) {
+						return true;
+					}else {
+						return false;
+					}				
 			}else if (equalsCar(allCars[i], car) != true){
 				i++;
 			}
@@ -247,40 +251,10 @@ public class MiRidesSystem {
 		return stringToTime;
 	}
 	
-	/*Checks allCars array for Car objects that are available. Returns false if there are none.
-	Else, returns true */
-	public boolean availableCars() {
-		
-		int i = 0; 
-		boolean found = false;
-		while(i < allCars.length) {
-			if (allCars[i] == null){
-				i = allCars.length;
-			}else if (allCars[i].getAvailable() == true){
-				i++;
-				found = true;
-			}else if (allCars[i].getAvailable() == false){
-				i++;
-			}
-		}
-		if (found == true) {
-			return true;
-		}else {
-			return false;
-		}
-	}
-	
-	//Returns available cars as array
-	public Car[] getAvailableCars() {
-		return availableCars;
-	}
+	/*Checks allCars array for Car objects that are available. Returns 1 if there are none.
+	Else, returns number of available cars */
+	public int availableCars() {
 
-	/*Initialises new availableCars array equal to allCars length. Searches allCars array for
-	available Cars. If found then prints Car reg number with number starting from 1 next to reg
-	number and adds the Car object to availableCars array starting at index 0. Then continues to
-	search for available cars until no more cars are found. */
-	public void printAvailableCars() {
-		
 		availableCars = new Car[allCars.length];
 		int i = 0; 
 		int j = 1;
@@ -288,14 +262,83 @@ public class MiRidesSystem {
 			if (allCars[i] == null){
 				i = allCars.length;
 			}else if (allCars[i].getAvailable() == true){
-				System.out.println(j + ".\t" + allCars[i].getRegNo());
 				availableCars[j - 1] = allCars[i];
 				j++;
 				i++;
 			}else if (allCars[i].getAvailable() == false){
 				i++;
 			}
-		}		
+		}
+		return j - 1;
+	}
+	
+	//Returns available cars array Car[]
+	public Car[] getAvailableCars() {
+		return availableCars;
+	}
+
+	/*Print all cars in availableCars array with index number starting at 1. */
+	public void printAvailableCars() throws NullPointerException {
+		
+		int i = 0;
+		int j = 0;
+		for (i = 0; i < availableCars(); i++) {
+			j++;
+			System.out.println(j + ".\t" + availableCars[i].getRegNo());
+		}
+	}
+	
+	/*Initialises new availableCars array equal to allCars length. Searches allCars array for
+	available Cars matching DateTime. If found then prints Car reg number with number starting from
+	1 next to reg number and adds the Car object to availableCars array starting at index 0. 
+	Then continues to search for available cars until no more cars are found. */
+	public Car[] printAvailableCars(DateTime required, String serviceType) {
+		
+		String requiredString = required.getFormattedDate();
+		availableCarsForDate = new Car[allCars.length];
+		int i = 0; 
+		int j = 0;
+		while(i < allCars.length) {
+			if (allCars[i] == null){
+				i = allCars.length;
+			}else if (allCars[i].findCurrentBooking(requiredString) == false){
+				if (serviceType.equalsIgnoreCase("SS") && allCars[i] instanceof SilverServiceCar == true) {
+					availableCarsForDate[j] = allCars[i];
+					j++;
+				}else if (serviceType.equalsIgnoreCase("SD") && allCars[i] instanceof SilverServiceCar == false) {
+					availableCarsForDate[j] = allCars[i];
+					j++;
+				}
+				i++;
+			}else if (allCars[i].findCurrentBooking(requiredString)){
+				i++;
+			}
+		}	
+		return availableCarsForDate;
+	}
+	
+	/*Checks allCars array for Car objects that are available for given DateTime. Returns false if 
+	there are none. Else, returns true */
+	public boolean availableCars(DateTime required) {
+		
+		String requiredString = required.getFormattedDate();
+		int i = 0; 
+		boolean found = false;
+		while(i < allCars.length) {
+			if (allCars[i] == null){
+				i = allCars.length;
+			}else if (allCars[i].findCurrentBooking(requiredString)){
+				i++;
+			}else if (allCars[i].findCurrentBooking(requiredString) == false){
+				i++;
+				found = true;
+			}
+		}
+		if (found == true) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	/*Checks regNo argument to find matching reg number in allCars array and loops until element in
@@ -393,19 +436,77 @@ public class MiRidesSystem {
 	/*Searches allCars array for car objects and prints them. If there are no assigned elements, error
 	message is printed. Else "no more cars" message is printed after all car objects found in array
 	are printed*/
-	public void displayAll() {
+	public void displayAll(String serviceType, String sortOrder) {
 		
-		int i = 0;
+		
+		int i = 0, j = 0;
+		Car[] tempCars = new Car[allCars.length];
 		while (i < allCars.length) {
-			if (allCars[i] != null) {
-				System.out.println(allCars[i].getDetails() + "\n");
-				i++;
-			}else if (i == 0 && allCars[i] == null) {
-				System.out.println("Error - No cars found in system\n");
+			if (i == 0 && allCars[i] == null) {
 				i = allCars.length;
 			}else if (allCars[i] == null) {
-				System.out.println("No more cars found in system\n");
 				i = allCars.length;
+			}else if (serviceType.equalsIgnoreCase("SS") && allCars[i] instanceof SilverServiceCar == true) {
+				tempCars[j] = allCars[i];
+				i++;
+				j++;
+			}else if (serviceType.equalsIgnoreCase("SD") && allCars[i] instanceof SilverServiceCar == false) {
+				tempCars[j] = allCars[i];
+				i++;
+				j++;
+			}else {
+				i++;
+			}
+		}
+		
+		if (j == 0) {
+			if (serviceType.equalsIgnoreCase("SS")) {
+				System.out.println("\nError - No silver service cars were found on the system.\n");
+			}else if (serviceType.equalsIgnoreCase("SD")) {
+				System.out.println("\nError - No standard cars were found on the system.\n");
+			}
+			return;
+		}
+				
+		Car[] sortedCars = new Car[j];
+		for(i = 0; i < j; i++) {
+			sortedCars[i] = tempCars[i];
+		}
+		
+		Car temp = new Car("temp", "temp", "temp", "temp", 9);
+        boolean swapped;
+    	for (i = 0; i < sortedCars.length - 1; i++) {
+    		swapped = false;
+			for (j = 0; j < sortedCars.length - 1; j++) {
+    			if (sortOrder.equalsIgnoreCase("A") && sortedCars[j].getRegNo().compareTo(sortedCars[j+1].getRegNo()) > 0) { 
+	                temp = sortedCars[j]; 
+	                sortedCars[j] = sortedCars[j+1]; 
+	                sortedCars[j+1] = temp; 
+	                swapped = true;
+	            } else if (sortOrder.equalsIgnoreCase("D") && sortedCars[j].getRegNo().compareTo(sortedCars[j+1].getRegNo()) < 0) { 
+	                temp = sortedCars[j]; 
+	                sortedCars[j] = sortedCars[j+1]; 
+	                sortedCars[j+1] = temp; 
+	                swapped = true;
+	            } 
+	    	}if (swapped == false) {
+    			break;
+    		}
+    	}
+	
+    	System.out.println("The following cars are available");
+		i = 0;
+		while (i < sortedCars.length) {
+			System.out.println("____________________________________________________________________________________\n");
+			if (sortedCars[i] != null) {
+				System.out.println(sortedCars[i].getDetails() + "\n");
+				i++;
+			}else if (i == 0 && sortedCars[i] == null) {
+				System.out.println("Error - No cars found in system\n");
+				i = sortedCars.length;
+			}else if (sortedCars[i] == null) {
+				System.out.println("No more cars found in system\n");
+				i = sortedCars.length;
 			}else {
 				i++;
 			}
@@ -417,14 +518,14 @@ public class MiRidesSystem {
 	the system. If not it adds the 6 Car objects to the array. Then books 4 Cars using the 4 DateTime
 	objects and 4 hardcoded booking instance variables and completes the booking for the last 2 cars
 	using the hardcoded travel distances. */
-	public void seedData() {
+	public void seedData() throws InvalidRefreshmentsException, InvalidPassCapException, InvalidBookingException {
 		
-		String[] rsscar0 = {"coke", "smokes", "therapy"};
-		String[] rsscar1 = {"coke", "smokes", "therapy"};
-		String[] rsscar2 = {"coke", "smokes", "therapy"};
-		String[] rsscar3 = {"coke", "smokes", "therapy"};
-		String[] rsscar4 = {"coke", "smokes", "therapy"};
-		String[] rsscar5 = {"coke", "smokes", "therapy"};
+		String[] rsscar0 = {"Coke", "Smokes", "Chocolate bars"};
+		String[] rsscar1 = {"Cold beverage", "MTV", "Karoake"};
+		String[] rsscar2 = {"Cadbury eggs", "Coconut water", "Cigars"};
+		String[] rsscar3 = {"Seafood", "Mojito", "Face towels"};
+		String[] rsscar4 = {"Lightsaber", "Fuzzy Tauntaun", "Meiloorun Juice"};
+		String[] rsscar5 = {"Waffles", "Steak", "Weed"};
 		
 		//Instantiates 6 hardcoded car objects
 		Car car0 = new Car("MJB007", "Aston Martin", "DB4", "James Bond", 5);

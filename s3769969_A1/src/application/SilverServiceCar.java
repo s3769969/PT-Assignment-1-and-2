@@ -12,37 +12,42 @@ public class SilverServiceCar extends Car{
 	private String[] refreshments;
 	
 	
-//	Car car = new SilverServiceCar("SSC123", "Toyota", "Hilux", "Road Warrior", 9, 1.50, refreshments);
-//	Car car4 = (Car) new SilverServiceCar("SSC123", "Toyota", "Hilux", "Road Warrior", 9, 1.50, refreshments);
-//	
-//	Car car2 = (SilverServiceCar) new Car("SSC123", "Toyota", "Hilux", "Road Warrior", 9);
-//	Car car3 = (SilverServiceCar) car;
-	
-	
 	/*Creates SS Car object based on arguments. Changes arguments to satisfy rules before assigning
 	them to class variables.*/
 	public SilverServiceCar(String regNo, String make, String model, String driverName,
-			int passengerCapacity, double bookingFee, String[] refreshments) {
+			int passengerCapacity, double bookingFee, String[] refreshments) throws InvalidRefreshmentsException {
 		super(regNo, make, model, driverName, passengerCapacity);
+		//Assigns standard SSCar booking fee if < $3 else sets booking fee to driver input
 		if (bookingFee < 3.00) {
 			setBookingFee(3.00);
 		}else {
 			setBookingFee(bookingFee);
 		}
-		this.refreshments = refreshments;
+		if (refreshments.length < 3) {
+			throw new InvalidRefreshmentsException("Error - you need a minimum of 3 refreshments qualify as a SS Car\n");
+		}
+		int i = 0;
+		int j = 0;
+		for (i = 0; i < refreshments.length; i++) {
+			for (j = i + 1; j < refreshments.length; j++) {
+				if (refreshments[i].trim().equalsIgnoreCase(refreshments[j].trim())) {	
+					throw new InvalidRefreshmentsException("Error - you have listed the same refreshment twice\n");
+				}
+			}
+		}
+		this.refreshments = refreshments; //Assigns car refreshments list to string array in SSCar
 		this.setTripFeeRate(0.4); //Assigns rate of 40% rate for SS Cars
 	}
 	
 	@Override
-	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) {
+	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) throws InvalidPassCapException, InvalidBookingException {
 		
 		/*Checks if required booking date is more than 3 days in the future. If so, it is displays
 		error and returns false. Else passes through.*/
 		DateTime current = new DateTime();
 		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff > 3) {
-			System.out.println("Error - Cannot book for more than 3 days in future.\n");
-			return false;
+			throw new InvalidDateException("Error - Cannot book for more than 3 days in future.\n");
 		}
 		return super.book(firstName, lastName, required, numPassengers); //Returns booking through superclass
 		
@@ -174,45 +179,48 @@ public class SilverServiceCar extends Car{
 
 	@Override
 	public String getDetails() {
-		return super.getDetails() + "Standard Fee:\t\t$" + this.getBookingFee() + "\n\nRefreshments"
-		+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + 
-		bookingsToString(getCurrentBookings()) + "PAST BOOKINGS" + bookingsToString(getPastBookings());
+		return "RegNo:\t\t\t" + getRegNo() + "\n" + "Make and Model:\t\t" + getMake() + " " + getModel() + "\n"
+		+ "DriverName:\t\t" + getDriverName() + "\n" + "Capacity:\t\t" + getPassengerCapacity() + "\n" + "Standard Fee:\t\t$"
+		+ this.getBookingFee() + "\nAvailable:\t\t" + availableString() + "\n\nRefreshments" + refreshmentsGetDetails(refreshments)
+		+ "\nCURRENT BOOKINGS" + bookingsGetDetails(getCurrentBookings()) + "\nPAST BOOKINGS" + bookingsGetDetails(getPastBookings());
 	}
 	
 	@Override
 	public String toString() {
-		return super.toString() + "Standard Fee:\t\t$" + this.getBookingFee() + "\n\nRefreshments"
-		+ " Available\n" + refreshmentsToString(refreshments) + "CURRENT BOOKINGS" + 
-		bookingsToString(getCurrentBookings()) + "PAST BOOKINGS" + bookingsToString(getPastBookings());
+		return getRegNo().toUpperCase() + ":" + getMake() + ":" + getModel() + ":" + getDriverName() + ":" + getPassengerCapacity()
+		+ ":" + availableString() + ":" + String.format("%.2f", this.getBookingFee()) + refreshmentsToString(refreshments) +
+		bookingsToString(getCurrentBookings()) + bookingsToString(getPastBookings());
 	}
 	
-	public String refreshmentsToString(String[] refreshments) {
+	public String refreshmentsGetDetails(String[] refreshments) {
 		if (refreshments[0] == null) {
 			return "No refreshments provided";
 		}
-		String items = "";
+		String items = "\n";
 		for (int i = 0; i < refreshments.length; i++) {
 			int itemNum = i + 1;
 			items += "Item " + itemNum + "\t\t" + refreshments[i].trim() + "\n";
 		}
-		return items + "\n";
+		return items;
+	}
+	
+	public String refreshmentsToString(String[] refreshments) {
+		if (refreshments[0] == null) {
+			return "";
+		}
+		String items = "";
+		for (int i = 0; i < refreshments.length; i++) {
+			int itemNum = i + 1;
+			items += ":Item " + itemNum + " " + refreshments[i].trim();
+		}
+		return items;
+	}
+	
+	public String bookingsGetDetails(Booking[] bookings) {
+		return super.bookingsGetDetails(bookings);
 	}
 	
 	public String bookingsToString(Booking[] bookings) {
-		if (bookings[0] == null) {
-			return "\n\t\t\t" + "---------------------------------------\n" + 
-		"\t\t\tNo bookings found\n\n";
-		}
-		String booking = "";
-		int i = 0;
-		while (bookings[i] != null || i == bookings.length) {
-			booking += "\n\t\t\t" + "---------------------------------------\n";
-			String lines[] = bookings[i].getDetails().split("\\r?\\n");
-			for (String string : lines) {
-				booking += "\t\t\t" + string + "\n";
-			}
-			i++;		
-		}
-		return booking;
+		return super.bookingsToString(bookings);
 	}
 }
