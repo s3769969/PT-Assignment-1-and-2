@@ -1,4 +1,4 @@
-package userInterface;
+package application;
 
 /*
  * Class:			InvalidRegException

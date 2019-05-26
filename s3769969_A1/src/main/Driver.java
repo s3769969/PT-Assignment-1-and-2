@@ -1,8 +1,8 @@
 package main;
 
 
+import application.MiRidesSystem;
 import userInterface.Menu;
-import userInterface.MiRidesSystem;
 
 /*
  * Class:			Driver

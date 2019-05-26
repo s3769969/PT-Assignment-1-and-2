@@ -341,6 +341,11 @@ public class Car {
 			return available;
 	}
 	
+	//Setter for available status of Car in boolean format
+	public void setAvailable(boolean available) {
+			this.available = available;
+	}
+	
 	//Getter for available status of Car in string format
 	public String availableString() {
 		if (available) {
@@ -364,22 +369,27 @@ public class Car {
 		return tripFeeRate;
 	}
 
+	//Setter for trip fee rate
 	public void setTripFeeRate(double tripFeeRate) {
 		this.tripFeeRate = tripFeeRate;
 	}
 	
+	//Getter for Current Bookings
 	public Booking[] getCurrentBookings() {
 		return currentBookings;
 	}
 
+	//Setter for Current Bookings
 	public void setCurrentBookings(Booking[] currentBookings) {
 		this.currentBookings = currentBookings;
 	}
 
+	//Getter for Past Bookings
 	public Booking[] getPastBookings() {
 		return pastBookings;
 	}
 
+	//Setter for Past Bookings
 	public void setPastBookings(Booking[] pastBookings) {
 		this.pastBookings = pastBookings;
 	}

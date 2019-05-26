@@ -1,11 +1,8 @@
-package userInterface;
+package application;
 
-import application.Car;
-import application.InvalidBookingException;
-import application.InvalidDateException;
-import application.InvalidPassCapException;
-import application.InvalidRefreshmentsException;
-import application.SilverServiceCar;
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
 import utilities.DateTime;
 
 /*
@@ -629,5 +626,192 @@ public class MiRidesSystem {
 		}
 		return sd;
 	}
+
+	public Car[] getAllCars() {
+		return allCars;
+	}
+
+	public void loadData(String loadData) throws InvalidRefreshmentsException, InvalidPassCapException, InvalidBookingException {
+		
+		String regNo = null, make = null, model = null, driverName = null, firstName = null,
+				lastName = null, available = null, id = null;
+		int passengerCapacity = 0, numPassengers = 0;
+		double bookingFee = 0, kmTravelled = 0;
+		String[] refreshments = {"test1", "test2", "test3"};
+		DateTime required = new DateTime();
+		
+		Car sdcar = new Car("aaa111", "test", "test", "test test", 5);
+		Car sscar = new SilverServiceCar("bbb222", "test", "test", "test test", 6, 3, refreshments);
+		String lines[] = loadData.split("\\r?\\n");
+		boolean sdcarState = false;
+		boolean sscarState = false;
+		
+		for (String line : lines) {
+			String[] elements = line.split(":");
+			if(elements.length == 7) {
+				sdcarState = true;
+				sscarState = false;
+				regNo = elements[0];
+				make = elements[1];
+				model = elements[2];
+				driverName = elements[3];
+				passengerCapacity = Integer.parseInt(elements[4]);
+				available = elements[5];
+				sdcar = new Car(regNo, make, model, driverName, passengerCapacity);
+				sdcar.setAvailable(available.equalsIgnoreCase("yes"));
+				addCar(sdcar);
+			}else if(elements.length > 8 && elements[0].startsWith("|") == false) {
+				sdcarState = false;
+				sscarState = true;
+				regNo = elements[0];
+				make = elements[1];
+				model = elements[2];
+				driverName = elements[3];
+				passengerCapacity = Integer.parseInt(elements[4]);
+				available = elements[5];
+				bookingFee = Double.parseDouble(elements[6]);
+				String items = "";
+				for (int i = 7; i < elements.length; i++) {
+					if (i == elements.length - 1) {
+						items += elements[i].substring(6);
+					}else {
+						items += elements[i].substring(6) + ", ";
+					}
+				}
+				refreshments = items.split(",");
+				sscar = new SilverServiceCar(regNo, make, model, driverName, passengerCapacity, bookingFee, refreshments);
+				sscar.setAvailable(available.equalsIgnoreCase("yes"));
+				sscar.setBookingFee(bookingFee);
+				addCar(sscar);
+			}else if (elements.length == 8 && elements[0].startsWith("|")) {
+				id = elements[0];
+				bookingFee = Double.parseDouble(elements[1]);
+				required = convert8DigitToTime(elements[2]);
+				String[] names = elements[3].split(" ");
+				firstName = names[0];
+				lastName = names[1];
+				numPassengers = Integer.parseInt(elements[4]);
+				kmTravelled = Double.parseDouble(elements[5]);
+				if (sdcarState == true) {
+					if(elements[5].startsWith("0")) {
+						bookCar(sdcar, firstName, lastName, required, numPassengers);
+					}else{
+						bookCar(sdcar, firstName, lastName, required, numPassengers);
+						completeBookingWithDate(required.getFormattedDate(), kmTravelled, firstName, lastName);
+					}
+				} else if (sscarState == true)
+					if(elements[5].startsWith("0")) {
+						bookCar(sscar, firstName, lastName, required, numPassengers);
+					}else{
+						bookCar(sscar, firstName, lastName, required, numPassengers);
+						completeBookingWithDate(required.getFormattedDate(), kmTravelled, firstName, lastName);
+					}
+			}
+		}
+	}
 	
+	//Converts eight digit time format to DateTime object
+	public DateTime convert8DigitToTime(String required) {
+		
+		int day = Integer.parseInt(required.substring(0, 2));
+		int month = Integer.parseInt(required.substring(2, 4));
+		int year = Integer.parseInt(required.substring(4));
+		DateTime stringToTime = new DateTime(day, month, year);
+		return stringToTime;
+	}
+
+	/*
+	 * Checks format of string argument. Returns true if format matches regex
+	 * pattern. Else, returns false
+	 */
+	public String checkRegFormat(String regNo) throws InvalidRegException {
+
+		String regex = "[a-zA-Z]{3}[0-9]{3}";
+		if (regNo.length() == 6 && Pattern.matches(regex, regNo)) {
+			return regNo;
+		} else {
+			throw new InvalidRegException(
+					"Error - Registration format is invalid," + " needs to be in the form 'ABC123'\n");
+		}
+	}
+
+	/*
+	 * Checks format of string argument. Returns true if format matches regex
+	 * pattern. Else, returns false
+	 */
+	public String checkDateFormat(String requiredString) throws InvalidDateException {
+
+		String regex = "[0-9]{2}/[0-9]{2}/[0-9]{4}";
+		if (requiredString.trim().length() == 10 && Pattern.matches(regex, requiredString.trim())) {
+			return requiredString;
+		} else {
+			throw new InvalidDateException(
+					"Error - Date format is invalid," + " needs to be in the form 'dd/MM/yyyy'\n");
+		}
+	}
+
+	// Checks length string argument. Loops user input prompt until string length is
+	// >2 characters
+	public String checkNameLength(String nameCheck) throws InvalidNameException {
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.println(nameCheck);
+		String name = scanner.nextLine().trim();
+		if (name.length() < 3) {
+			throw new InvalidNameException("Error - Name is too short.\nRe-");
+		}
+		return name;
+	}
+
+	// Checks passenger capacity is between 1-9
+	public int checkPassCap(int passengerCapacity) throws InvalidPassCapException {
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter Passenger Capacity: ");
+		passengerCapacity = scanner.nextInt();
+		String fix = scanner.nextLine();// Adds scanner.nextLine after int/double input to fix input skip
+		if (passengerCapacity < 1 || passengerCapacity > 9) {
+			throw new InvalidPassCapException("Error - Passenger Capacity is invalid\n");
+		}
+		return passengerCapacity;
+	}
+
+	// Checks standard fee >$3
+	public double checkBookingFee(double bookingFee) throws InvalidBookingFeeException {
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter Standard Fee: ");
+		bookingFee = scanner.nextDouble();
+		String fix = scanner.nextLine();// Adds scanner.nextLine after int/double input to fix input skip
+		if (bookingFee < 3) {
+			throw new InvalidBookingFeeException("Error - SS Cars minimum booking fee is $3\n");
+		}
+		return bookingFee;
+	}
+
+	// Checks string argument for service type is valid
+	public String checkServiceType(String serviceType) throws InvalidServiceTypeException {
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter Service Type (SD/SS): ");
+		serviceType = scanner.nextLine().trim();
+		if (serviceType.equalsIgnoreCase("sd") || serviceType.equalsIgnoreCase("ss")) {
+			return serviceType;
+		} else {
+			throw new InvalidServiceTypeException("Error - Service type must be either SD or SS\n");
+		}
+	}
+
+	// Checks string argument for sort order is valid
+	public String checkSortOrder(String sortOrder) throws InvalidSortOrderException {
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter Sort Order (A/D): ");
+		sortOrder = scanner.nextLine().trim();
+		if (sortOrder.equalsIgnoreCase("a") || sortOrder.equalsIgnoreCase("d")) {
+			return sortOrder;
+		} else {
+			throw new InvalidSortOrderException("Error - Sort order must be either A or D\n");
+		}
+	}
 }
