@@ -1,7 +1,6 @@
 package main;
 
 
-import application.MiRidesSystem;
 import userInterface.Menu;
 
 /*

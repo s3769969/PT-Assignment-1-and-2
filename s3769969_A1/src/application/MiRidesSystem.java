@@ -1,5 +1,10 @@
 package application;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -25,7 +30,111 @@ public class MiRidesSystem {
 	public void createAllCarsArray() {
 		allCars = new Car[20];
 	}
+	
+	// Loads saved Car objects from file or back up file, if original save file is not found
+	public void loadData() {
 
+		String fileName = "saveMain.txt";
+		String loadData = "";
+		Scanner input = null;
+		System.out.println("\nAttempting to load Data from saveMain.txt\n");
+		try{
+			input = new Scanner(new File(fileName));
+		}catch(FileNotFoundException e){
+			System.out.println("Error - could not find Data file " + fileName);
+			System.out.println("\nAttempting to load Data from saveBackUp.txt\n");
+			loadDataBackUp();
+			return;
+		}while(input.hasNextLine()){
+			loadData += input.nextLine() + "\n";
+		}
+		
+		try {
+			loadData(loadData);
+			System.out.println("Load successful!\n");
+			input.close();
+		}catch (InvalidRefreshmentsException e) {
+			System.out.println(e.getMessage());
+		}catch (InvalidPassCapException e) {
+			System.out.println(e.getMessage());
+		}catch (InvalidBookingException e) {
+			System.out.println(e.getMessage());
+		}catch (LoadDataIncompleteException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	// Loads saved Car objects from file or back up file, if original save file is not found
+	public void loadDataBackUp() {
+
+		String fileName = "saveBackUp.txt";
+		String loadData = "";
+		Scanner input = null;
+		try{
+			input = new Scanner(new File(fileName));
+		}catch(FileNotFoundException e){
+			System.out.println("Error - could not find Data file " + fileName + "\n");
+			return;
+		}while(input.hasNextLine()){
+			loadData += input.nextLine() + "\n";
+		}
+		
+		try {
+			loadData(loadData);
+			input.close();
+			System.out.println("Load successful!\n");
+		}catch (InvalidRefreshmentsException e) {
+			System.out.println(e.getMessage());
+		}catch (InvalidPassCapException e) {
+			System.out.println(e.getMessage());
+		}catch (InvalidBookingException e) {
+			System.out.println(e.getMessage());
+		}catch (LoadDataIncompleteException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	// Saves Car object data to file and a copy to back up file
+	public void saveData() {
+
+		Car[] allCars = getAllCars();
+		String allCarsToString = "";
+		int i = 0;
+		while (i < allCars.length) {
+			if (allCars[i] == null) {
+				i = allCars.length;
+			} else {
+				allCarsToString += allCars[i].toString() + "\n";
+				i++;
+			}
+		}
+
+		File saveMain = new File("saveMain.txt");
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(new FileOutputStream(saveMain));
+			out.write(allCarsToString);
+			System.out.println("Main save file complete\n");
+			out.close();
+		} catch (FileNotFoundException e) {
+			System.out.println(e.toString());
+		} catch (IOException e) {
+			System.out.println(e.toString());
+		}
+
+		File saveBackUp = new File("saveBackUp.txt");
+		try {
+			out = new PrintWriter(new FileOutputStream(saveBackUp));
+			out.write(allCarsToString);
+			System.out.println("Back up save file complete\n");
+			out.close();
+		} catch (FileNotFoundException e) {
+			System.out.println(e.toString());
+		} catch (IOException e) {
+			System.out.println(e.toString());
+		}
+	}
+	
 	/*Checks registrations no of two cars and returns true if the same as another otherwise returns
 	false*/
 	public boolean equalsCar(Car car1, Car car2) {
@@ -254,19 +363,19 @@ public class MiRidesSystem {
 
 		availableCars = new Car[allCars.length];
 		int i = 0; 
-		int j = 1;
+		int j = 0;
 		while(i < allCars.length) {
 			if (allCars[i] == null){
 				i = allCars.length;
 			}else if (allCars[i].getAvailable() == true){
-				availableCars[j - 1] = allCars[i];
+				availableCars[j] = allCars[i];
 				j++;
 				i++;
 			}else if (allCars[i].getAvailable() == false){
 				i++;
 			}
 		}
-		return j - 1;
+		return j;
 	}
 	
 	//Returns available cars array Car[]
@@ -286,10 +395,10 @@ public class MiRidesSystem {
 	}
 	
 	/*Initialises new availableCars array equal to allCars length. Searches allCars array for
-	available Cars matching DateTime. If found then prints Car reg number with number starting from
-	1 next to reg number and adds the Car object to availableCars array starting at index 0. 
-	Then continues to search for available cars until no more cars are found. */
-	public Car[] printAvailableCars(DateTime required, String serviceType) {
+	available Cars matching DateTime. If found then adds Car reg number with number starting from
+	1 next to reg number to availableCars array starting at index 0. Then continues to search for 
+	available cars until no more cars are found. */
+	public Car[] availableCars(DateTime required, String serviceType) {
 		
 		String requiredString = required.getFormattedDate();
 		availableCarsForDate = new Car[allCars.length];
@@ -631,7 +740,7 @@ public class MiRidesSystem {
 		return allCars;
 	}
 
-	public void loadData(String loadData) throws InvalidRefreshmentsException, InvalidPassCapException, InvalidBookingException {
+	public void loadData(String loadData) throws InvalidRefreshmentsException, InvalidPassCapException, InvalidBookingException, LoadDataIncompleteException {
 		
 		String regNo = null, make = null, model = null, driverName = null, firstName = null,
 				lastName = null, available = null, id = null;
@@ -645,6 +754,7 @@ public class MiRidesSystem {
 		String lines[] = loadData.split("\\r?\\n");
 		boolean sdcarState = false;
 		boolean sscarState = false;
+		int errorCheck = 0;
 		
 		for (String line : lines) {
 			String[] elements = line.split(":");
@@ -660,7 +770,7 @@ public class MiRidesSystem {
 				sdcar = new Car(regNo, make, model, driverName, passengerCapacity);
 				sdcar.setAvailable(available.equalsIgnoreCase("yes"));
 				addCar(sdcar);
-			}else if(elements.length > 8 && elements[0].startsWith("|") == false) {
+			}else if(elements.length > 7 && elements[0].startsWith("|") == false) {
 				sdcarState = false;
 				sscarState = true;
 				regNo = elements[0];
@@ -694,19 +804,38 @@ public class MiRidesSystem {
 				kmTravelled = Double.parseDouble(elements[5]);
 				if (sdcarState == true) {
 					if(elements[5].startsWith("0")) {
-						bookCar(sdcar, firstName, lastName, required, numPassengers);
+						try {
+							bookCar(sdcar, firstName, lastName, required, numPassengers);
+						}catch (InvalidBookingException e) {
+							errorCheck += 1;
+						}
 					}else{
-						bookCar(sdcar, firstName, lastName, required, numPassengers);
-						completeBookingWithDate(required.getFormattedDate(), kmTravelled, firstName, lastName);
+						try {
+							bookCar(sdcar, firstName, lastName, required, numPassengers);
+							completeBookingWithDate(required.getFormattedDate(), kmTravelled, firstName, lastName);
+						}catch (InvalidBookingException e) {
+							errorCheck += 1;
+						}
 					}
 				} else if (sscarState == true)
 					if(elements[5].startsWith("0")) {
-						bookCar(sscar, firstName, lastName, required, numPassengers);
+						try {
+							bookCar(sscar, firstName, lastName, required, numPassengers);
+						}catch (InvalidBookingException e) {
+							errorCheck += 1;
+						}
 					}else{
-						bookCar(sscar, firstName, lastName, required, numPassengers);
-						completeBookingWithDate(required.getFormattedDate(), kmTravelled, firstName, lastName);
-					}
+						try {
+							bookCar(sscar, firstName, lastName, required, numPassengers);
+							completeBookingWithDate(required.getFormattedDate(), kmTravelled, firstName, lastName);
+						}catch (InvalidBookingException e) {
+							errorCheck += 1;
+						}
+				}
 			}
+		}
+		if (errorCheck != 0) {
+			throw new LoadDataIncompleteException("Error - " + errorCheck + " bookings could not be retrieved\n");
 		}
 	}
 	
@@ -766,10 +895,6 @@ public class MiRidesSystem {
 	// Checks passenger capacity is between 1-9
 	public int checkPassCap(int passengerCapacity) throws InvalidPassCapException {
 
-		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter Passenger Capacity: ");
-		passengerCapacity = scanner.nextInt();
-		String fix = scanner.nextLine();// Adds scanner.nextLine after int/double input to fix input skip
 		if (passengerCapacity < 1 || passengerCapacity > 9) {
 			throw new InvalidPassCapException("Error - Passenger Capacity is invalid\n");
 		}
@@ -792,10 +917,8 @@ public class MiRidesSystem {
 	// Checks string argument for service type is valid
 	public String checkServiceType(String serviceType) throws InvalidServiceTypeException {
 
-		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter Service Type (SD/SS): ");
-		serviceType = scanner.nextLine().trim();
 		if (serviceType.equalsIgnoreCase("sd") || serviceType.equalsIgnoreCase("ss")) {
+			serviceType = serviceType.toUpperCase();
 			return serviceType;
 		} else {
 			throw new InvalidServiceTypeException("Error - Service type must be either SD or SS\n");
@@ -805,13 +928,32 @@ public class MiRidesSystem {
 	// Checks string argument for sort order is valid
 	public String checkSortOrder(String sortOrder) throws InvalidSortOrderException {
 
-		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter Sort Order (A/D): ");
-		sortOrder = scanner.nextLine().trim();
 		if (sortOrder.equalsIgnoreCase("a") || sortOrder.equalsIgnoreCase("d")) {
 			return sortOrder;
 		} else {
 			throw new InvalidSortOrderException("Error - Sort order must be either A or D\n");
+		}
+	}
+	
+	// Checks string argument for sort order is valid and throws exception if invalid
+	public void checkValidDateForService(String requiredString, String serviceType) throws InvalidDateException {
+		DateTime required = convertStringToTime(requiredString);
+		DateTime current = new DateTime();
+		int dayDiff = 0;
+		if (serviceType.equalsIgnoreCase("ss")){
+			dayDiff = DateTime.actualDiffDays(required, current);
+			if (dayDiff < 0) {
+				throw new InvalidDateException("Error - Cannot book for days in the past.\n");
+			}else if (dayDiff > 3) {
+				throw new InvalidDateException("Error - Cannot book for more than 3 days in future.\n");
+			}
+		}else {
+			dayDiff = DateTime.actualDiffDays(required, current);
+			if (dayDiff < 0) {
+				throw new InvalidDateException("Error - Cannot book for days in the past.\n");
+			}else if (dayDiff > 7) {
+				throw new InvalidDateException("Error - Cannot book for more than 7 days in future.\n");
+			}
 		}
 	}
 }
