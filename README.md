@@ -46,7 +46,7 @@ Using p2 repository, with the Install New Software wizard (or to reference in p2
 
 * Windows 10
 * Eclipse IDE
-* JDK 1.8
+* JDK/JRE 1.8
 
 ## Versioning
 
@@ -64,4 +64,4 @@ This project is licensed under the RMIT University License Policy
 
 ## Acknowledgments
 
-* Hat tip to anyone who provided inspiration and whose code was used and thoe listed as contributor for providing baseline code and similar examples
+* Hat tip to anyone who provided inspiration and whose code was used and those listed as contributors for providing baseline code and similar exemplar code
