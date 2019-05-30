@@ -25,16 +25,13 @@ public class Menu {
 
 	private MiRidesSystem system; // class of MiRidesSystem is accessible to all Menu methods
 
+	// Instantiates MiRidesSystem class and calls method to create allCars array and load save data
 	public Menu() {
-
-	}
-
-	// Instantiates MiRidesSystem class and calls method to create allCars array
-	public void createSystem() {
 
 		system = new MiRidesSystem(); // instantiates MiRidesSystem class after driver runs program
 		system.createAllCarsArray(); // calls method to create allCars array
 		system.loadData(); // attempts to load data from save file and back up if unsuccessful
+		run(); //Goes to menu print/selection method
 	}
 
 	/*
@@ -44,7 +41,7 @@ public class Menu {
 	public void run() {
 
 		// Print menu display
-		System.out.println("*** MiRides System Menu ***" + "\n");
+		System.out.println("\n*** MiRides System Menu ***" + "\n");
 		System.out.println("Create Car                         CC" + "\n");
 		System.out.println("Book Car                           BC" + "\n");
 		System.out.println("Complete Booking                   CB" + "\n");
@@ -137,12 +134,10 @@ public class Menu {
 			try {
 				passengerCapacity = scanner1.nextInt();
 				String fix = scanner1.nextLine();// Adds scanner.nextLine after int/double input to fix input skip
-			} catch (InputMismatchException e) {
-				System.out.println("Please enter an integer!\n");
-			}
-			try {
 				passengerCapacity = system.checkPassCap(passengerCapacity);
 				i = 1;
+			}catch (InputMismatchException e) {
+				System.out.println("Please enter an integer!\n");
 			}catch (InvalidPassCapException e) {
 				System.out.println(e.getMessage());
 			}
@@ -159,7 +154,7 @@ public class Menu {
 			try {
 				serviceType = system.checkServiceType(serviceType);
 				i = 1;
-			} catch (InvalidServiceTypeException e) {
+			}catch (InvalidServiceTypeException e) {
 				System.out.println(e.getMessage());
 			}
 		}
