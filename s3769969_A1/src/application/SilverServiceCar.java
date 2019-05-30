@@ -7,50 +7,56 @@ import utilities.DateTime;
  * Description:		The class represents a specific SilverServiceCar
  * Author:			Sebastian Wisidagama - s3769969
  */
-public class SilverServiceCar extends Car{
+public class SilverServiceCar extends Car {
 
 	private String[] refreshments;
-	
-	
-	/*Creates SS Car object based on arguments. Changes arguments to satisfy rules before assigning
-	them to class variables.*/
-	public SilverServiceCar(String regNo, String make, String model, String driverName,
-			int passengerCapacity, double bookingFee, String[] refreshments) throws InvalidRefreshmentsException {
+
+	/*
+	 * Creates SS Car object based on arguments. Changes arguments to satisfy rules
+	 * before assigning them to class variables.
+	 */
+	public SilverServiceCar(String regNo, String make, String model, String driverName, int passengerCapacity,
+			double bookingFee, String[] refreshments) throws InvalidRefreshmentsException, InvalidBookingFeeException,
+			InvalidRegException {
 		super(regNo, make, model, driverName, passengerCapacity);
-		//Assigns standard SSCar booking fee if < $3 else sets booking fee to driver input
+		// throws error if SSCar booking fee < $3 else sets booking fee to driver input
 		if (bookingFee < 3.00) {
-			setBookingFee(3.00);
+			throw new InvalidBookingFeeException("Error - SS Cars minimum booking fee is $3\n");
 		}else {
 			setBookingFee(bookingFee);
 		}
 		if (refreshments.length < 3) {
-			throw new InvalidRefreshmentsException("Error - you need a minimum of 3 refreshments qualify as a SS Car\n");
+			throw new InvalidRefreshmentsException(
+					"Error - you need a minimum of 3 refreshments qualify as a SS Car\n");
 		}
 		int i = 0;
 		int j = 0;
 		for (i = 0; i < refreshments.length; i++) {
 			for (j = i + 1; j < refreshments.length; j++) {
-				if (refreshments[i].trim().equalsIgnoreCase(refreshments[j].trim())) {	
+				if (refreshments[i].trim().equalsIgnoreCase(refreshments[j].trim())) {
 					throw new InvalidRefreshmentsException("Error - you have listed the same refreshment twice\n");
 				}
 			}
 		}
-		this.refreshments = refreshments; //Assigns car refreshments list to string array in SSCar
-		this.setTripFeeRate(0.4); //Assigns rate of 40% rate for SS Cars
+		this.refreshments = refreshments; // Assigns car refreshments list to string array in SSCar
+		this.setTripFeeRate(0.4); // Assigns rate of 40% rate for SS Cars
 	}
-	
+
 	@Override
-	public boolean book(String firstName, String lastName, DateTime required, int numPassengers) throws InvalidPassCapException, InvalidBookingException {
-		
-		/*Checks if required booking date is more than 3 days in the future. If so, it is displays
-		error and returns false. Else passes through.*/
+	public boolean book(String firstName, String lastName, DateTime required, int numPassengers)
+			throws InvalidPassCapException, InvalidBookingException {
+
+		/*
+		 * Checks if required booking date is more than 3 days in the future. If so, it
+		 * is displays error and returns false. Else passes through.
+		 */
 		DateTime current = new DateTime();
 		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff > 3) {
 			throw new InvalidDateException("Error - Cannot book for more than 3 days in future.\n");
 		}
-		return super.book(firstName, lastName, required, numPassengers); //Returns booking through superclass
-		
+		return super.book(firstName, lastName, required, numPassengers); // Returns booking through superclass
+
 	}
 
 	@Override
@@ -130,14 +136,14 @@ public class SilverServiceCar extends Car{
 	public String availableString() {
 		return super.availableString();
 	}
-	
-	//Getter for booking fee double of SS Car
+
+	// Getter for booking fee double of SS Car
 	@Override
 	public double getBookingFee() {
 		return super.getBookingFee();
 	}
 
-	//Setter for booking fee double of SS Car
+	// Setter for booking fee double of SS Car
 	@Override
 	public void setBookingFee(double bookingFee) {
 		super.setBookingFee(bookingFee);
@@ -168,30 +174,32 @@ public class SilverServiceCar extends Car{
 	public void setPastBookings(Booking[] pastBookings) {
 		super.setPastBookings(pastBookings);
 	}
-	
-	public String currentBookingsToString(){ 
+
+	public String currentBookingsToString() {
 		return "";
 	}
-	
-	public String pastBookingsToString(){
+
+	public String pastBookingsToString() {
 		return "";
 	}
 
 	@Override
 	public String getDetails() {
 		return "RegNo:\t\t\t" + getRegNo() + "\n" + "Make and Model:\t\t" + getMake() + " " + getModel() + "\n"
-		+ "DriverName:\t\t" + getDriverName() + "\n" + "Capacity:\t\t" + getPassengerCapacity() + "\n" + "Standard Fee:\t\t$"
-		+ this.getBookingFee() + "\nAvailable:\t\t" + availableString() + "\n\nRefreshments" + refreshmentsGetDetails(refreshments)
-		+ "\nCURRENT BOOKINGS" + bookingsGetDetails(getCurrentBookings()) + "\nPAST BOOKINGS" + bookingsGetDetails(getPastBookings());
+				+ "DriverName:\t\t" + getDriverName() + "\n" + "Capacity:\t\t" + getPassengerCapacity() + "\n"
+				+ "Standard Fee:\t\t$" + this.getBookingFee() + "\nAvailable:\t\t" + availableString()
+				+ "\n\nRefreshments" + refreshmentsGetDetails(refreshments) + "\nCURRENT BOOKINGS"
+				+ bookingsGetDetails(getCurrentBookings()) + "\nPAST BOOKINGS" + bookingsGetDetails(getPastBookings());
 	}
-	
+
 	@Override
 	public String toString() {
-		return getRegNo().toUpperCase() + ":" + getMake() + ":" + getModel() + ":" + getDriverName() + ":" + getPassengerCapacity()
-		+ ":" + availableString() + ":" + String.format("%.2f", this.getBookingFee()) + refreshmentsToString(refreshments) +
-		bookingsToString(getCurrentBookings()) + bookingsToString(getPastBookings());
+		return getRegNo().toUpperCase() + ":" + getMake() + ":" + getModel() + ":" + getDriverName() + ":"
+				+ getPassengerCapacity() + ":" + availableString() + ":" + String.format("%.2f", this.getBookingFee())
+				+ refreshmentsToString(refreshments) + bookingsToString(getCurrentBookings())
+				+ bookingsToString(getPastBookings());
 	}
-	
+
 	public String refreshmentsGetDetails(String[] refreshments) {
 		if (refreshments[0] == null) {
 			return "No refreshments provided";
@@ -203,7 +211,7 @@ public class SilverServiceCar extends Car{
 		}
 		return items;
 	}
-	
+
 	public String refreshmentsToString(String[] refreshments) {
 		if (refreshments[0] == null) {
 			return "";
@@ -215,11 +223,11 @@ public class SilverServiceCar extends Car{
 		}
 		return items;
 	}
-	
+
 	public String bookingsGetDetails(Booking[] bookings) {
 		return super.bookingsGetDetails(bookings);
 	}
-	
+
 	public String bookingsToString(Booking[] bookings) {
 		return super.bookingsToString(bookings);
 	}

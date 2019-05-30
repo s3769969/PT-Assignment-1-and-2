@@ -25,13 +25,17 @@ public class Menu {
 
 	private MiRidesSystem system; // class of MiRidesSystem is accessible to all Menu methods
 
-	// Instantiates MiRidesSystem class and calls method to create allCars array and load save data
+	// Instantiates MiRidesSystem class and calls method to create allCars array and
+	// load save data
 	public Menu() {
 
 		system = new MiRidesSystem(); // instantiates MiRidesSystem class after driver runs program
-		system.createAllCarsArray(); // calls method to create allCars array
-		system.loadData(); // attempts to load data from save file and back up if unsuccessful
-		run(); //Goes to menu print/selection method
+		try {
+			system.loadData();
+		} catch (InvalidRegException e) {
+			System.out.println(e.getMessage());// attempts to load data from save file or back up if unsuccessful
+		} 
+		run(); // Goes to menu print/selection method
 	}
 
 	/*
@@ -55,14 +59,13 @@ public class Menu {
 		String menuChoice;
 		menuChoice = scanner.nextLine().trim();
 
-		
 		/*
 		 * Keeps waiting for correct input (case insensitive) and if matches, then
 		 * redirects to another method in Menu class or exits system if user inputs "ex"
 		 * (case insensitive)
 		 */
 		do {
-			
+
 			if (menuChoice.equalsIgnoreCase("CC")) {
 				createCar();
 			} else if (menuChoice.equalsIgnoreCase("BC")) {
@@ -136,9 +139,9 @@ public class Menu {
 				String fix = scanner1.nextLine();// Adds scanner.nextLine after int/double input to fix input skip
 				passengerCapacity = system.checkPassCap(passengerCapacity);
 				i = 1;
-			}catch (InputMismatchException e) {
+			} catch (InputMismatchException e) {
 				System.out.println("Please enter an integer!\n");
-			}catch (InvalidPassCapException e) {
+			} catch (InvalidPassCapException e) {
 				System.out.println(e.getMessage());
 			}
 		}
@@ -154,7 +157,7 @@ public class Menu {
 			try {
 				serviceType = system.checkServiceType(serviceType);
 				i = 1;
-			}catch (InvalidServiceTypeException e) {
+			} catch (InvalidServiceTypeException e) {
 				System.out.println(e.getMessage());
 			}
 		}
@@ -163,9 +166,13 @@ public class Menu {
 		double bookingFee = 0.0;
 		String refreshments = null;
 		// Checks if Car is SS and asks for more input details. Re-prompts details until
-		// no exceptions are created
+		// no exceptions are created from booking fee.
 		if (serviceType.equalsIgnoreCase("SS")) {
 			while (i == 0) {
+				Scanner scanner1 = new Scanner(System.in);
+				System.out.print("Enter Standard Fee: ");
+				bookingFee = scanner1.nextDouble();
+				String fix = scanner1.nextLine();// Adds scanner.nextLine after int/double input to fix input skip
 				try {
 					bookingFee = system.checkBookingFee(bookingFee);
 					i = 1;
@@ -186,9 +193,17 @@ public class Menu {
 				System.out.println("New SS Car successfully added for registration number: " + regNo + "\n");
 			} catch (InvalidRefreshmentsException e) {
 				System.out.println(e.getMessage());
+			} catch (InvalidBookingFeeException e) {
+				System.out.println(e.getMessage());
+			} catch (InvalidRegException e) {
+				System.out.println(e.getMessage());
 			}
 		} else {
-			system.addCar(regNo, make, model, driverName, passengerCapacity);
+			try {
+				system.addCar(regNo, make, model, driverName, passengerCapacity);
+			} catch (InvalidRegException e) {
+				System.out.println(e.getMessage());
+			}
 			System.out.println("New Car successfully added for registration number: " + regNo + "\n");
 		}
 		run(); // Returns to menu display whether or not car was added
@@ -209,7 +224,7 @@ public class Menu {
 		/*
 		 * User enters input for date required in format dd/MM/yyyy, the format is
 		 * checked and if invalid format message is printed and user loops back.
-		 * Otherwise the loop is passed through
+		 * Otherwise the loop is passed through and input is converted to DateTime object
 		 */
 		while (i == 0) {
 			System.out.println("Enter Date Required in dd/MM/yyyy: ");
@@ -223,7 +238,7 @@ public class Menu {
 			}
 		}
 		DateTime required = system.convertStringToTime(requiredString);
-		
+
 		/*
 		 * Checks MiRidesSystem to see if there are available cars. If false prints
 		 * error and returns to menu. Else print available car list and message prompt
@@ -278,7 +293,6 @@ public class Menu {
 				System.out.print(e.getMessage());
 			}
 		}
-
 		i = 0;
 		String lastName = "Enter Last Name: "; // Initialises last name string
 		while (i == 0) {
@@ -449,7 +463,7 @@ public class Menu {
 		/*
 		 * Completes booking using travel distance input and regNoOrDate string as
 		 * formatted date. Then overrides total fee after getting it from booking
-		 * class.Then, prints response after total fee is overridden
+		 * class. Then, prints response after total fee is overridden
 		 */
 		if (i == 2) {
 			if (system.completeBookingWithDate(regNoOrDate, kilometersTravelled, firstName, lastName)) {
@@ -507,22 +521,21 @@ public class Menu {
 		int i = 0;
 		String requiredString = null; // String that user will input required date with
 
+		//Checks for valid service type and passes through. Else prints error and returns to menu
 		System.out.print("Enter Service Type (SD/SS): ");
 		String serviceType = scanner.nextLine().toUpperCase();
 		try {
 			system.checkServiceType(serviceType);
-		}catch (InvalidServiceTypeException e){
+		} catch (InvalidServiceTypeException e) {
 			System.out.println(e.getMessage());
 			run();
 		}
-		
+
 		/*
 		 * User enters input for date required in format dd/MM/yyyy, the format is
 		 * checked and if invalid format message is printed and user loops back. If
-		 * format is correct a copy user string is converted to DateTime object and
-		 * overrides the required DateTime object. If DateTime is in the past or more
-		 * than 1 week in future, for either case an error message is displayed.
-		 * Otherwise the loop is passed through
+		 * format is correct and valid for given service type a copy user string is
+		 * converted to DateTime object and overrides the required DateTime object.
 		 */
 		while (i == 0) {
 			System.out.print("Enter Required Booking Date: ");
@@ -536,29 +549,34 @@ public class Menu {
 				System.out.println(e.getMessage());
 			}
 		}
-		DateTime required = system.convertStringToTime(requiredString); 
+		DateTime required = system.convertStringToTime(requiredString);
 
-		/* Checks MiRidesSystem to see if there are available cars. If false prints
-		error and returns to menu. Else prints available cars in list */
+		/*
+		 * Checks MiRidesSystem to see if there are available cars. If false prints
+		 * error and returns to menu. Else prints available cars in list
+		 */
 		int j = 0;
 		Car[] availableCarsForDate = system.availableCars(required, serviceType);
 		if (availableCarsForDate[0] != null) {
 			System.out.println("Available " + serviceType + " cars for " + requiredString);
 		}
 		while (availableCarsForDate[j] != null && j < availableCarsForDate.length) {
-			System.out.println("____________________________________________________________________________________\n");
+			System.out
+					.println("____________________________________________________________"
+							+ "________________________\n");
 			System.out.println(availableCarsForDate[j].getDetails());
 			j++;
 		}
 		if (j == 0) {
 			System.out.println("Error - No cars were found on this date.\n");
-		}	
+		}
 		run(); // Returns to menu display
 	}
 
 	/*
 	 * Prints list of all Car details of all Car objects found in allCars array in
-	 * MiRidesSystem then returns console to display menu
+	 * MiRidesSystem in specific order and based on service type then returns 
+	 * console to display menu
 	 */
 	public void displayAll() {
 
@@ -567,7 +585,7 @@ public class Menu {
 		String serviceType = scanner.nextLine();
 		try {
 			system.checkServiceType(serviceType);
-		}catch (InvalidServiceTypeException e){
+		} catch (InvalidServiceTypeException e) {
 			System.out.println(e.getMessage());
 			run();
 		}
@@ -575,16 +593,20 @@ public class Menu {
 		String sortOrder = scanner.nextLine();
 		try {
 			system.checkSortOrder(sortOrder);
-		}catch (InvalidSortOrderException e){
+		} catch (InvalidSortOrderException e) {
 			System.out.println(e.getMessage());
 			run();
 		}
-		system.displayAll(serviceType, sortOrder);
+		try {
+			system.displayAll(serviceType, sortOrder);
+		} catch (InvalidRegException e) {
+			System.out.println(e.getMessage());
+		}
 		run();
 	}
 
 	/*
-	 * Adds 6 hardcoded cars, with 2 booked only, and 2 with completed bookings into
+	 * Adds 12 hardcoded cars, with 4 booked only, and 4 with completed bookings into
 	 * allCars array in MiRidesSystem, only if cars are not already in array. Then
 	 * returns console to display menu
 	 */
@@ -594,11 +616,15 @@ public class Menu {
 			system.seedData();
 		} catch (InvalidRefreshmentsException e) {
 			System.out.println(e.getMessage());
+		} catch (InvalidBookingFeeException e) {
+			System.out.println(e.getMessage());
 		} catch (InvalidDateException e) {
 			System.out.println(e.getMessage());
 		} catch (InvalidPassCapException e) {
 			System.out.println(e.getMessage());
 		} catch (InvalidBookingException e) {
+			System.out.println(e.getMessage());
+		} catch (InvalidRegException e) {
 			System.out.println(e.getMessage());
 		}
 		run();
