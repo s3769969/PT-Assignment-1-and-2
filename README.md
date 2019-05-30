@@ -1,22 +1,3 @@
-Skip to content
- 
-Search or jump to…
-
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@s3769969 
-0
-0 0 s3769969/PT-Assignment-1-and-2 Private
- Code  Issues 0  Pull requests 0  Projects 0  Wiki  Security  Insights  Settings
-PT-Assignment-1-and-2
-/
-README.md
- 
-
-1
 # MiRide Application
 2
 ​
