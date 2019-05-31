@@ -769,10 +769,11 @@ public class MiRidesSystem {
 	public void seedData() throws InvalidRefreshmentsException, InvalidPassCapException, InvalidBookingException,
 	InvalidBookingFeeException, InvalidRegException {
 
+		//String arrays for different refreshments
 		String[] rsscar0 = { "Coke", "Smokes", "Chocolate bars" };
 		String[] rsscar1 = { "Cold beverage", "MTV", "Karoake" };
 		String[] rsscar2 = { "Cadbury eggs", "Coconut water", "Cigars" };
-		String[] rsscar3 = { "Seafood", "Mojito", "Face towels" };
+		String[] rsscar3 = { "Seafood", "Mojitos", "Face towels" };
 		String[] rsscar4 = { "Lightsaber", "Fuzzy Tauntaun", "Meiloorun Juice" };
 		String[] rsscar5 = { "Waffles", "Steak", "Weed" };
 
@@ -910,7 +911,8 @@ public class MiRidesSystem {
 	 * 							COMPLETE SS CAR BOOKING USING VARIABLES
 	 * 						CATCH EXCEPTIONS
 	 * 							ADD 1 TO ERROR COUNTER
-	 * 
+	 * 			ELSE
+	 * 				ADD 1 TO ERROR COUNTER
 	 * 	IF ERROR COUNTER IS NOT 0 PRINT ERROR COUNT MESSAGE
 	 */
 	public void loadData(String loadData) throws InvalidRefreshmentsException, InvalidPassCapException,
@@ -992,7 +994,7 @@ public class MiRidesSystem {
 							errorCheck += 1;
 						}
 					}
-				} else if (sscarState == true)
+				} else if (sscarState == true) {
 					if (elements[5].startsWith("0")) {
 						try {
 							bookCar(sscar, firstName, lastName, required, numPassengers);
@@ -1007,7 +1009,10 @@ public class MiRidesSystem {
 							errorCheck += 1;
 						}
 					}
-			}
+				}
+			}else {
+					errorCheck += 1;
+				}
 		}
 		if (errorCheck != 0) {
 			throw new LoadDataIncompleteException("Error - " + errorCheck + " bookings could not be retrieved\n");
