@@ -27,7 +27,8 @@ public class Car {
 	 * Creates Car object based on arguments. Changes arguments to satisfy rules
 	 * before assigning them to class variables.
 	 */
-	public Car(String regNo, String make, String model, String driverName, int passengerCapacity) throws InvalidRegException {
+	protected Car(String regNo, String make, String model, String driverName, int passengerCapacity) 
+			throws InvalidRegException {
 
 		/*
 		 * Checks registration string format is in format 'ABC123' else defaults it to
@@ -70,7 +71,7 @@ public class Car {
 	 * Otherwise method returns false. If 5 bookings exist in currentBookings array
 	 * then method updates available variable to false.
 	 */
-	public boolean book(String firstName, String lastName, DateTime required, int numPassengers)
+	protected boolean book(String firstName, String lastName, DateTime required, int numPassengers)
 			throws InvalidPassCapException, InvalidBookingException {
 
 		// Checks booking date is available and return true/false
@@ -121,7 +122,7 @@ public class Car {
 	 * Checks booking date is not already in currentBookings array. If so, it is
 	 * displays error and returns false. Else passes through.
 	 */
-	public boolean checkForDoubleBooking(DateTime required) throws InvalidBookingException {
+	protected boolean checkForDoubleBooking(DateTime required) throws InvalidBookingException {
 
 		int i = 0;
 		while (i < currentBookings.length) {
@@ -144,13 +145,13 @@ public class Car {
 	 * loop. If next null element is <5th element, available status is set to true
 	 * and passes through the loop.
 	 */
-	public boolean checkForOverBooking(DateTime required) throws InvalidDateException {
+	protected boolean checkForOverBooking(DateTime required) throws InvalidBookingException {
 
 		int i = 0;
 		do {
 			if (i > 4) {
 				available = false;
-				throw new InvalidDateException("Error - Car can only have 5 current bookings.\n");
+				throw new InvalidBookingException("Error - Car can only have 5 current bookings.\n");
 			} else if (currentBookings[i] == null) {
 				if (i < 4) {
 					available = true;
@@ -169,14 +170,14 @@ public class Car {
 	 * Checks if required booking date is in the past or more than 7 days in the
 	 * future. If so, it is displays error and returns false. Else passes through.
 	 */
-	public boolean checkValidDate(DateTime required) throws InvalidDateException {
+	protected boolean checkValidDate(DateTime required) throws InvalidBookingException {
 
 		DateTime current = new DateTime();
 		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff < 0) {
-			throw new InvalidDateException("Error - Cannot book for days in the past.\n");
+			throw new InvalidBookingException("Error - Cannot book for days in the past.\n");
 		} else if (dayDiff > 7) {
-			throw new InvalidDateException("Error - Cannot book for more than 7 days in future.\n");
+			throw new InvalidBookingException("Error - Cannot book for more than 7 days in future.\n");
 		}
 		return true;
 	}
@@ -201,9 +202,8 @@ public class Car {
 		return "Error - No booking reference found.\n";
 	}
 
-	// Checks arguments match existing past booking and returns total fee. Else,
-	// returns error message.
-	public String getTotalFee(Double kilometersTravelled, String firstName, String lastName) {
+	// Checks arguments match existing past booking and returns total fee. Else, returns error message.
+	protected String getTotalFee(Double kilometersTravelled, String firstName, String lastName) {
 
 		int i = 0; // Initialise local variable i
 
@@ -229,7 +229,7 @@ public class Car {
 	 * Checks arguments match existing booking and returns true if booking is
 	 * completed. Else, returns false.
 	 */
-	public boolean completeBookingUsingReg(Double kilometersTravelled, String firstName, String lastName) {
+	protected boolean completeBookingUsingReg(Double kilometersTravelled, String firstName, String lastName) {
 
 		int i = 0; // Initialise local variable i
 		int j = 100; // Initialise local variable j out of booking array lengths
@@ -295,7 +295,7 @@ public class Car {
 	 * Checks if there are in bookings in currentBookings array. If so, returns
 	 * true. Else, returns false.
 	 */
-	public boolean findCurrentBookingByReg() {
+	protected boolean findCurrentBookingByReg() {
 
 		int i = 0;
 		if (currentBookings[i] == null) {
@@ -309,7 +309,7 @@ public class Car {
 	 * Checks if argument matches a booking in currentBookings array. If so, returns
 	 * true. Else, returns false.
 	 */
-	public boolean findCurrentBooking(String required) {
+	protected boolean findCurrentBooking(String required) {
 
 		int i = 0;
 		while (i < currentBookings.length) {
@@ -328,7 +328,7 @@ public class Car {
 	 * Checks if argument matches a booking in pastBookings array. If so, returns
 	 * true. Else, returns false.
 	 */
-	public boolean findPastBooking(String required) {
+	protected boolean findPastBooking(String required) {
 
 		int i = 0;
 		while (i < pastBookings.length) {
@@ -347,7 +347,7 @@ public class Car {
 	 * Converts string argument to DateTime object if string is in format
 	 * "dd/MM/yyyy" and returns DateTime object
 	 */
-	public DateTime convertStringToTime(String string) {
+	protected DateTime convertStringToTime(String string) {
 
 		int day = Integer.parseInt(string.substring(0, 2));
 		int month = Integer.parseInt(string.substring(3, 5));
@@ -357,17 +357,17 @@ public class Car {
 	}
 
 	// Getter for registration number string of Car
-	public String getRegNo() {
+	protected String getRegNo() {
 		return regNo;
 	}
 
 	// Getter for make string of Car
-	public String getMake() {
+	protected String getMake() {
 		return make;
 	}
 
 	// Getter for model string of Car
-	public String getModel() {
+	protected String getModel() {
 		return model;
 	}
 
@@ -377,22 +377,22 @@ public class Car {
 	}
 
 	// Getter for passenger capacity integer of Car
-	public int getPassengerCapacity() {
+	protected int getPassengerCapacity() {
 		return passengerCapacity;
 	}
 
 	// Getter for available status of Car in boolean format
-	public boolean getAvailable() {
+	protected boolean getAvailable() {
 		return available;
 	}
 
 	// Setter for available status of Car in boolean format
-	public void setAvailable(boolean available) {
+	protected void setAvailable(boolean available) {
 		this.available = available;
 	}
 
 	// Getter for available status of Car in string format
-	public String availableString() {
+	protected String availableString() {
 		if (available) {
 			return "YES";
 		} else {
@@ -401,41 +401,42 @@ public class Car {
 	}
 
 	// Getter for booking fee double of Car
-	public double getBookingFee() {
+	protected double getBookingFee() {
 		return bookingFee;
 	}
 
 	// Setter for booking fee double of Car
-	public void setBookingFee(double bookingFee) {
+	protected void setBookingFee(double bookingFee) {
 		this.bookingFee = bookingFee;
 	}
 
-	public double getTripFeeRate() {
+	// Getter for trip fee rate of Car
+	protected double getTripFeeRate() {
 		return tripFeeRate;
 	}
 
-	// Setter for trip fee rate
-	public void setTripFeeRate(double tripFeeRate) {
+	// Setter for trip fee rate of Car
+	protected void setTripFeeRate(double tripFeeRate) {
 		this.tripFeeRate = tripFeeRate;
 	}
 
 	// Getter for Current Bookings
-	public Booking[] getCurrentBookings() {
+	protected Booking[] getCurrentBookings() {
 		return currentBookings;
 	}
 
 	// Setter for Current Bookings
-	public void setCurrentBookings(Booking[] currentBookings) {
+	protected void setCurrentBookings(Booking[] currentBookings) {
 		this.currentBookings = currentBookings;
 	}
 
 	// Getter for Past Bookings
-	public Booking[] getPastBookings() {
+	protected Booking[] getPastBookings() {
 		return pastBookings;
 	}
 
 	// Setter for Past Bookings
-	public void setPastBookings(Booking[] pastBookings) {
+	protected void setPastBookings(Booking[] pastBookings) {
 		this.pastBookings = pastBookings;
 	}
 
@@ -449,7 +450,7 @@ public class Car {
 	}
 
 	// Returns string for all current/past bookings in human readable format
-	public String bookingsGetDetails(Booking[] bookings) {
+	protected String bookingsGetDetails(Booking[] bookings) {
 		if (bookings[0] == null) {
 			return "\n\t\t\t" + "__________________________________________\n" + "\t\t\tNo bookings found\n\n";
 		}
@@ -473,15 +474,25 @@ public class Car {
 				+ bookingsToString(getCurrentBookings()) + bookingsToString(getPastBookings());
 	}
 
-	// Returns string for all current/past bookings in predefined format for
-	// computer
-	public String bookingsToString(Booking[] bookings) {
+	/* Returns string for all current/past bookings in predefined format for computer
+	*	
+	*ALGORITHM
+	*IF ARGUMENT ARRAY BEGINS WITH NULL ELEMENT
+	*	RETURN EMPTY STRING
+	*INSTANTIATE BOOKING STRING
+	*ASSIGN COUNTER AS 0
+	*WHILE BOOKING STRING HAS ELEMENT THAT IS NOT NULL AND COUNTER IS < ARRAY LENGTH
+	*	ADD BOOKING.TOSTRING METHOD
+	*	ADD 1 TO COUNTER
+	*RETURN BOOKING STRING
+	*/
+	protected String bookingsToString(Booking[] bookings) {
 		if (bookings[0] == null) {
 			return "";
 		}
 		String booking = "";
 		int i = 0;
-		while (bookings[i] != null || i == bookings.length) {
+		while (bookings[i] != null && i < bookings.length) {
 			booking += "\n|" + bookings[i].toString();
 			i++;
 		}

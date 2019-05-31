@@ -5,7 +5,6 @@ import java.util.Scanner;
 import application.Car;
 import application.InvalidBookingException;
 import application.InvalidBookingFeeException;
-import application.InvalidDateException;
 import application.InvalidNameException;
 import application.InvalidPassCapException;
 import application.InvalidRefreshmentsException;
@@ -233,7 +232,7 @@ public class Menu {
 			try {
 				requiredString = system.checkDateFormat(requiredString);
 				i = 1;
-			} catch (InvalidDateException e) {
+			} catch (InvalidBookingException e) {
 				System.out.println(e.getMessage());
 			}
 		}
@@ -372,7 +371,7 @@ public class Menu {
 				try {
 					system.checkDateFormat(regNoOrDate);
 					i = 2;
-				} catch (InvalidDateException f) {
+				} catch (InvalidBookingException f) {
 					System.out.println("Error - Registration number format (eg: 'ABC123') "
 							+ "or Date format (eg: 'dd/MM/yyyy') is invalid\n");
 				}
@@ -514,6 +513,38 @@ public class Menu {
 	/*
 	 * Prints list of all available cars for specific date and service type based on
 	 * user input
+	 * 
+	 * ALGORITHM
+	 * 
+	 * DISPLAY PROMPT
+	 * ENTER SERVICE TYPE STRING
+	 * TRY
+	 * 		CHECK DATE STRING IS VALID
+	 * CATCH
+	 * 		PRINT EXCEPTION MESSAGE
+	 * 		RUN MENU
+	 * 
+	 * WHILE COUNTER IS 0
+	 * 		ENTER DATE STRING
+	 * 		TRY
+	 * 			CHECK VALID DATE FORMAT
+	 * 			CHECK VALID DATE FOR SERVICE TYPE
+	 * 			COUNTER IS ASSIGNED TO 1
+	 * 		CATCH
+	 * 			PRINT EXCEPTION MESSAGE
+	 * CONVERT DATE STRING TO DATETIME OBJECT
+	 * 
+	 * ASSIGN 0 TO NEW COUNTER
+	 * ASSIGN AVAILABLE CARS TO NEW CAR ARRAY USING MIRIDES CLASS METHOD
+	 * 
+	 * IF CAR ARRAY HAS 1ST ELEMENT THAT IS NOT NULL
+	 * 		PRINT GENERAL MESSAGE
+	 * WHILE CAR ARRAY HAS ELEMENT
+	 * 		PRINT CAR DETAILS
+	 * 		ADD 1 TO COUNTER
+	 * IF COUNTER IS NULL
+	 * 		PRINT ERROR MESSAGE
+	 * RETURN TO PRINT MENU
 	 */
 	public void searchAvailable() {
 
@@ -545,7 +576,7 @@ public class Menu {
 				system.checkDateFormat(requiredString);
 				system.checkValidDateForService(requiredString, serviceType);
 				i = 1;
-			} catch (InvalidDateException e) {
+			} catch (InvalidBookingException e) {
 				System.out.println(e.getMessage());
 			}
 		}
@@ -618,11 +649,9 @@ public class Menu {
 			System.out.println(e.getMessage());
 		} catch (InvalidBookingFeeException e) {
 			System.out.println(e.getMessage());
-		} catch (InvalidDateException e) {
+		} catch (InvalidBookingException e) {
 			System.out.println(e.getMessage());
 		} catch (InvalidPassCapException e) {
-			System.out.println(e.getMessage());
-		} catch (InvalidBookingException e) {
 			System.out.println(e.getMessage());
 		} catch (InvalidRegException e) {
 			System.out.println(e.getMessage());

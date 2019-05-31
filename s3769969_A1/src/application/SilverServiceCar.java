@@ -12,19 +12,20 @@ public class SilverServiceCar extends Car {
 	private String[] refreshments;
 
 	/*
-	 * Creates SS Car object based on arguments. Changes arguments to satisfy rules
+	 * Creates SS Car object based on arguments. Throws exception if argument does not satisfy rules
 	 * before assigning them to class variables.
 	 */
-	public SilverServiceCar(String regNo, String make, String model, String driverName, int passengerCapacity,
+	protected SilverServiceCar(String regNo, String make, String model, String driverName, int passengerCapacity,
 			double bookingFee, String[] refreshments) throws InvalidRefreshmentsException, InvalidBookingFeeException,
 			InvalidRegException {
 		super(regNo, make, model, driverName, passengerCapacity);
-		// throws error if SSCar booking fee < $3 else sets booking fee to driver input
+		// throws error if SSCar booking fee < $3 else sets booking fee to driver input else assigns fee
 		if (bookingFee < 3.00) {
 			throw new InvalidBookingFeeException("Error - SS Cars minimum booking fee is $3\n");
 		}else {
 			setBookingFee(bookingFee);
 		}
+		// throws error if < 3 refreshments or repeated refreshments else assigns refreshments
 		if (refreshments.length < 3) {
 			throw new InvalidRefreshmentsException(
 					"Error - you need a minimum of 3 refreshments qualify as a SS Car\n");
@@ -39,11 +40,12 @@ public class SilverServiceCar extends Car {
 			}
 		}
 		this.refreshments = refreshments; // Assigns car refreshments list to string array in SSCar
-		this.setTripFeeRate(0.4); // Assigns rate of 40% rate for SS Cars
+		this.setTripFeeRate(0.4); // Assigns trip fee rate of 40% rate for SS Cars
 	}
 
+	//Books SS Car if no rules are broken, else throws relevant exception
 	@Override
-	public boolean book(String firstName, String lastName, DateTime required, int numPassengers)
+	protected boolean book(String firstName, String lastName, DateTime required, int numPassengers)
 			throws InvalidPassCapException, InvalidBookingException {
 
 		/*
@@ -53,136 +55,156 @@ public class SilverServiceCar extends Car {
 		DateTime current = new DateTime();
 		int dayDiff = DateTime.actualDiffDays(required, current);
 		if (dayDiff > 3) {
-			throw new InvalidDateException("Error - Cannot book for more than 3 days in future.\n");
+			throw new InvalidBookingException("Error - Cannot book for more than 3 days in future.\n");
 		}
 		return super.book(firstName, lastName, required, numPassengers); // Returns booking through superclass
 
 	}
 
-	@Override
+	/*
+	 * Checks string argument for date match in currentBookings array. If found,
+	 * returns booking ID. Else, returns error.
+	 */
 	public String getBookingRef(DateTime required) {
 		return super.getBookingRef(required);
 	}
 
-	@Override
-	public String getTotalFee(Double kilometersTravelled, String firstName, String lastName) {
+	// Checks arguments match existing past booking and returns total fee. Else, returns error message.
+	protected String getTotalFee(Double kilometersTravelled, String firstName, String lastName) {
 		return super.getTotalFee(kilometersTravelled, firstName, lastName);
 	}
 
-	@Override
-	public boolean completeBookingUsingReg(Double kilometersTravelled, String firstName, String lastName) {
+	/*
+	 * Checks arguments match existing booking and returns true if booking is
+	 * completed. Else, returns false.
+	 */
+	protected boolean completeBookingUsingReg(Double kilometersTravelled, String firstName, String lastName) {
 		return super.completeBookingUsingReg(kilometersTravelled, firstName, lastName);
 	}
 
-	@Override
-	public boolean findCurrentBookingByReg() {
+	/*
+	 * Checks if there are in bookings in currentBookings array. If so, returns
+	 * true. Else, returns false.
+	 */
+	protected boolean findCurrentBookingByReg() {
 		return super.findCurrentBookingByReg();
 	}
 
-	@Override
-	public boolean findCurrentBooking(String required) {
+	/*
+	 * Checks if argument matches a booking in currentBookings array. If so, returns
+	 * true. Else, returns false.
+	 */
+	protected boolean findCurrentBooking(String required) {
 		return super.findCurrentBooking(required);
 	}
 
-	@Override
-	public boolean findPastBooking(String required) {
+	/*
+	 * Checks if argument matches a booking in pastBookings array. If so, returns
+	 * true. Else, returns false.
+	 */
+	protected boolean findPastBooking(String required) {
 		return super.findPastBooking(required);
 	}
 
-	@Override
-	public DateTime convertStringToTime(String string) {
+	/*
+	 * Converts string argument to DateTime object if string is in format
+	 * "dd/MM/yyyy" and returns DateTime object
+	 */
+	protected DateTime convertStringToTime(String string) {
 		return super.convertStringToTime(string);
 	}
 
-	@Override
-	public String getRegNo() {
+	// Getter for registration number string of SS Car
+	protected String getRegNo() {
 		return super.getRegNo();
 	}
 
-	@Override
-	public String getMake() {
+	// Getter for make string of SS Car
+	protected String getMake() {
 		return super.getMake();
 	}
 
-	@Override
-	public String getModel() {
+	// Getter for model string of SS Car
+	protected String getModel() {
 		return super.getModel();
 	}
 
-	@Override
+	// Getter for driver name string of SS Car
 	public String getDriverName() {
 		return super.getDriverName();
 	}
 
-	@Override
-	public int getPassengerCapacity() {
+	// Getter for passenger capacity integer of SS Car
+	protected int getPassengerCapacity() {
 		return super.getPassengerCapacity();
 	}
 
-	public String[] getRefreshments() {
+	// Getter for refreshments list of SS Car
+	protected String[] getRefreshments() {
 		return refreshments;
 	}
 
-	public void setRefreshments(String[] refreshments) {
+	// Setter for refreshments list of SS Car
+	protected void setRefreshments(String[] refreshments) {
 		this.refreshments = refreshments;
 	}
 
-	@Override
-	public boolean getAvailable() {
+	// Getter for available status of SS Car in boolean format
+	protected boolean getAvailable() {
 		return super.getAvailable();
 	}
 
-	@Override
-	public String availableString() {
+	// Setter for available status of SS Car in boolean format
+	protected void setAvailable(boolean available) {
+		super.setAvailable(available);
+	}
+	
+	// Getter for available status of SS Car in string format
+	protected String availableString() {
 		return super.availableString();
 	}
 
 	// Getter for booking fee double of SS Car
-	@Override
-	public double getBookingFee() {
+	protected double getBookingFee() {
 		return super.getBookingFee();
 	}
 
 	// Setter for booking fee double of SS Car
-	@Override
-	public void setBookingFee(double bookingFee) {
+	protected void setBookingFee(double bookingFee) {
 		super.setBookingFee(bookingFee);
 	}
 
-	@Override
-	public double getTripFeeRate() {
+	// Getter for trip fee rate of SS Car
+	protected double getTripFeeRate() {
 		return super.getTripFeeRate();
 	}
 
-	@Override
-	public void setTripFeeRate(double tripFeeRate) {
+	// Setter for trip fee rate of SS Car
+	protected void setTripFeeRate(double tripFeeRate) {
 		super.setTripFeeRate(tripFeeRate);
 	}
 
-	public Booking[] getCurrentBookings() {
+	// Getter for Current Bookings
+	protected Booking[] getCurrentBookings() {
 		return super.getCurrentBookings();
 	}
 
-	public void setCurrentBookings(Booking[] currentBookings) {
+	// Setter for Current Bookings
+	protected void setCurrentBookings(Booking[] currentBookings) {
 		super.setCurrentBookings(currentBookings);
 	}
 
-	public Booking[] getPastBookings() {
+	// Getter for Past Bookings
+	protected Booking[] getPastBookings() {
 		return super.getPastBookings();
 	}
 
-	public void setPastBookings(Booking[] pastBookings) {
+	// Setter for Past Bookings
+	protected void setPastBookings(Booking[] pastBookings) {
 		super.setPastBookings(pastBookings);
 	}
 
-	public String currentBookingsToString() {
-		return "";
-	}
-
-	public String pastBookingsToString() {
-		return "";
-	}
-
+	// Getter for SS Car details in human readable format
 	@Override
 	public String getDetails() {
 		return "RegNo:\t\t\t" + getRegNo() + "\n" + "Make and Model:\t\t" + getMake() + " " + getModel() + "\n"
@@ -192,6 +214,7 @@ public class SilverServiceCar extends Car {
 				+ bookingsGetDetails(getCurrentBookings()) + "\nPAST BOOKINGS" + bookingsGetDetails(getPastBookings());
 	}
 
+	// Getter for SS Car details in predefined format for computer
 	@Override
 	public String toString() {
 		return getRegNo().toUpperCase() + ":" + getMake() + ":" + getModel() + ":" + getDriverName() + ":"
@@ -200,7 +223,8 @@ public class SilverServiceCar extends Car {
 				+ bookingsToString(getPastBookings());
 	}
 
-	public String refreshmentsGetDetails(String[] refreshments) {
+	// Returns string for all refreshments in human readable format
+	protected String refreshmentsGetDetails(String[] refreshments) {
 		if (refreshments[0] == null) {
 			return "No refreshments provided";
 		}
@@ -212,7 +236,18 @@ public class SilverServiceCar extends Car {
 		return items;
 	}
 
-	public String refreshmentsToString(String[] refreshments) {
+	/* Returns string for all refreshments in predefined format for computer
+	*	
+	*ALGORITHM
+	*IF ARGUMENT ARRAY BEGINS WITH NULL ELEMENT
+	*	RETURN EMPTY STRING
+	*INSTANTIATE ITEMS STRING
+	*FOR EACH ELEMENT IN REFRESHMENTS ARRAY WHILE < ARRAY LENGTH
+	*	ADD 1 COUNT TO ITEM NUMBER
+	*	ADD ":ITEM" STRING AND TRIMMED REFRESHMENTS ELEMENT TO ITEM STRING
+	*RETURN ITEMS STRING
+	*/
+	protected String refreshmentsToString(String[] refreshments) {
 		if (refreshments[0] == null) {
 			return "";
 		}
@@ -224,11 +259,13 @@ public class SilverServiceCar extends Car {
 		return items;
 	}
 
-	public String bookingsGetDetails(Booking[] bookings) {
+	// Returns string for all current/past bookings in human readable format
+	protected String bookingsGetDetails(Booking[] bookings) {
 		return super.bookingsGetDetails(bookings);
 	}
 
-	public String bookingsToString(Booking[] bookings) {
+	// Returns string for all current/past bookings in predefined format for computer
+	protected String bookingsToString(Booking[] bookings) {
 		return super.bookingsToString(bookings);
 	}
 }

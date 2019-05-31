@@ -12,8 +12,15 @@ import utilities.DateTime;
 
 /*
  * Class:			MiRidesApplication
- * Description:		The class presents a contains methods validating user inputs against the data
- *                  in the system
+ * Description:		The class contains methods loading/saving system data to file, validating
+ * 					user inputs against the data in the system, and methods allowing cars/bookings to be 
+ * 					created, retrieved, modified, and stored in the system.
+ *                  
+ *                  **NOTE** - Input Exceptions were also generated here but handled differently by the
+ *                  Menu class (Re-enter input) for ease of use. Exception generation is also done in
+ *                  ss/car classes as per assignment specifications to prevent invalid car/booking objects.
+ *                  These exceptions simply return relevant message strings for the exception thrown.
+ *                  
  * Author:			Sebastian Wisidagama - s3769969
  */
 public class MiRidesSystem {
@@ -266,7 +273,8 @@ public class MiRidesSystem {
 	 * object to allCars array if element index is empty, else looks for next empty
 	 * element index and adds it there
 	 */
-	public void addCar(String regNo, String make, String model, String driverName, int passengerCapacity) throws InvalidRegException {
+	public void addCar(String regNo, String make, String model, String driverName, int passengerCapacity)
+			throws InvalidRegException {
 
 		Car car = new Car(regNo, make, model, driverName, passengerCapacity);
 		int i = 0;
@@ -286,7 +294,8 @@ public class MiRidesSystem {
 	 * element index and adds it there
 	 */
 	public void addCar(String regNo, String make, String model, String driverName, int passengerCapacity,
-			double bookingFee, String refreshmentsList) throws InvalidRefreshmentsException, InvalidBookingFeeException, InvalidRegException {
+			double bookingFee, String refreshmentsList) throws InvalidRefreshmentsException, 
+			InvalidBookingFeeException, InvalidRegException {
 
 		String[] refreshments = refreshmentsList.split(",");
 		Car car = new SilverServiceCar(regNo, make, model, driverName, passengerCapacity, bookingFee, refreshments);
@@ -723,7 +732,12 @@ public class MiRidesSystem {
 			}
 		}
 
-		System.out.println("The following cars are available");
+		if (serviceType.equalsIgnoreCase("SS")) {
+			System.out.println("The following silver service cars are available:");
+		} else if (serviceType.equalsIgnoreCase("SD")) {
+			System.out.println("The following standard cars are available:");
+		}
+		
 		i = 0;
 		while (i < sortedCars.length) {
 			System.out
@@ -1029,13 +1043,13 @@ public class MiRidesSystem {
 	 * Checks format of string argument. Returns true if format matches regex
 	 * pattern. Else, returns false
 	 */
-	public String checkDateFormat(String requiredString) throws InvalidDateException {
+	public String checkDateFormat(String requiredString) throws InvalidBookingException {
 
 		String regex = "[0-9]{2}/[0-9]{2}/[0-9]{4}";
 		if (requiredString.trim().length() == 10 && Pattern.matches(regex, requiredString.trim())) {
 			return requiredString;
 		} else {
-			throw new InvalidDateException(
+			throw new InvalidBookingException(
 					"Error - Date format is invalid," + " needs to be in the form 'dd/MM/yyyy'\n");
 		}
 	}
@@ -1094,23 +1108,23 @@ public class MiRidesSystem {
 
 	// Checks string argument for sort order is valid and throws exception if
 	// invalid
-	public void checkValidDateForService(String requiredString, String serviceType) throws InvalidDateException {
+	public void checkValidDateForService(String requiredString, String serviceType) throws InvalidBookingException {
 		DateTime required = convertStringToTime(requiredString);
 		DateTime current = new DateTime();
 		int dayDiff = 0;
 		if (serviceType.equalsIgnoreCase("ss")) {
 			dayDiff = DateTime.actualDiffDays(required, current);
 			if (dayDiff < 0) {
-				throw new InvalidDateException("Error - Cannot book for days in the past.\n");
+				throw new InvalidBookingException("Error - Cannot book for days in the past.\n");
 			} else if (dayDiff > 3) {
-				throw new InvalidDateException("Error - Cannot book for more than 3 days in future.\n");
+				throw new InvalidBookingException("Error - Cannot book for more than 3 days in future.\n");
 			}
 		} else {
 			dayDiff = DateTime.actualDiffDays(required, current);
 			if (dayDiff < 0) {
-				throw new InvalidDateException("Error - Cannot book for days in the past.\n");
+				throw new InvalidBookingException("Error - Cannot book for days in the past.\n");
 			} else if (dayDiff > 7) {
-				throw new InvalidDateException("Error - Cannot book for more than 7 days in future.\n");
+				throw new InvalidBookingException("Error - Cannot book for more than 7 days in future.\n");
 			}
 		}
 	}

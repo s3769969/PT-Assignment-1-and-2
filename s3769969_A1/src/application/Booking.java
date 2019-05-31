@@ -24,7 +24,7 @@ public class Booking {
 	 * Creates Booking object based on arguments. Changes arguments to satisfy rules
 	 * before assigning them to class variables.
 	 */
-	public Booking(String firstName, String lastName, DateTime required, int numPassengers, Car car) {
+	protected Booking(String firstName, String lastName, DateTime required, int numPassengers, Car car) {
 
 		this.car = car;
 		if (firstName.trim().length() < 3) {
@@ -75,69 +75,69 @@ public class Booking {
 	}
 
 	// Getter for booking id string
-	public String getId() {
+	protected String getId() {
 		return id;
 	}
 
 	// Getter for first name string
-	public String getFirstName() {
+	protected String getFirstName() {
 		return firstName;
 	}
 
 	// Getter for last name string
-	public String getLastName() {
+	protected String getLastName() {
 		return lastName;
 	}
 
 	// Getter for pick up time DateTime object
-	public DateTime getPickUpDateTime() {
+	protected DateTime getPickUpDateTime() {
 		return pickUpDateTime;
 	}
 
 	// Getter for pick up time String in "dd/MM/yyyy" format
-	public String getFormattedPickUpDate() {
+	protected String getFormattedPickUpDate() {
 		return pickUpDateTime.getFormattedDate();
 	}
 
 	// Getter for number of passengers integer
-	public int getNumPassengers() {
+	protected int getNumPassengers() {
 		return numPassengers;
 	}
 
 	// Getter for Car object associated with booking
-	public Car getCar() {
+	protected Car getCar() {
 		return car;
 	}
 
 	// Getter for kilometers travelled double
-	public double getKilometersTravelled() {
+	protected double getKilometersTravelled() {
 		return kilometersTravelled;
 	}
 
 	// Setter for kilometers travelled double
-	public void setKilometersTravelled(double kilometersTravelled) {
+	protected void setKilometersTravelled(double kilometersTravelled) {
 		this.kilometersTravelled = kilometersTravelled;
 	}
 
 	// Getter for trip fee double
-	public double getTripFee(Double tripFeeRate) {
+	protected double getTripFee(Double tripFeeRate) {
 		tripFee = kilometersTravelled * bookingFee * tripFeeRate;
 		return tripFee;
 	}
 
 	// Getter for booking fee double
-	public double getBookingFee() {
+	protected double getBookingFee() {
 		return bookingFee;
 	}
 
 	// Setter for booking fee double
-	public double setBookingFee(double bookingFee) {
+	protected double setBookingFee(double bookingFee) {
 		this.bookingFee = bookingFee;
 		return bookingFee;
 	}
 
 	// Getter for kilometers travelled string. Returns N/A, if booking not completed
-	public String travelled() {
+	protected String travelled() {
 		if (getKilometersTravelled() != 0) {
 			return kilometersTravelled + "km";
 		} else
@@ -146,7 +146,7 @@ public class Booking {
 
 	// Getter for kilometers travelled for toString method. Returns 0.0, if booking
 	// not completed
-	public String travelledToString() {
+	protected String travelledToString() {
 		if (getKilometersTravelled() != 0) {
 			return "" + kilometersTravelled;
 		} else
@@ -154,7 +154,7 @@ public class Booking {
 	}
 
 	// Getter for trip fee string. Returns N/A, if booking not completed
-	public String tripFee() {
+	protected String tripFee() {
 		if (getKilometersTravelled() != 0) {
 			tripFee = kilometersTravelled * bookingFee * this.getCar().getTripFeeRate();
 			String tripFeeTo2Decimals = String.format("%.2f", tripFee);
@@ -164,7 +164,7 @@ public class Booking {
 	}
 
 	// Getter for trip fee cost for toString. Returns 0.0, if booking not completed
-	public String tripFeeToString() {
+	protected String tripFeeToString() {
 		if (getKilometersTravelled() != 0) {
 			tripFee = kilometersTravelled * bookingFee * this.getCar().getTripFeeRate();
 			String tripFeeTo2Decimals = String.format("%.2f", tripFee);
@@ -174,7 +174,7 @@ public class Booking {
 	}
 
 	// Getter for total fee string. Returns N/A, if booking not completed
-	public String totalFee() {
+	protected String totalFee() {
 		if (getKilometersTravelled() != 0) {
 			double totalFee = bookingFee + kilometersTravelled * bookingFee * this.getCar().getTripFeeRate();
 			String totalFeeTo2Decimals = String.format("%.2f", totalFee);
@@ -185,7 +185,6 @@ public class Booking {
 
 	// Getter for Booking details in human readable format
 	public String getDetails() {
-
 		return "id:           " + id + "\n" + "Booking Fee:  " + "$" + bookingFee + "\n" + "Pick up Date: "
 				+ getPickUpDateTime().getFormattedDate() + "\n" + "Name:         " + firstName + " " + lastName + "\n"
 				+ "Passengers:   " + numPassengers + "\n" + "Travelled:    " + travelled() + "\n" + "Trip Fee:     "
